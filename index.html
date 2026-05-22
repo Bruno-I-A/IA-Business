@@ -1,698 +1,618 @@
-<!DOCTYPE html><html data-src-ver="17d00644" lang="pt-BR"><head>
-
-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IA na Prática — Inteligência Artificial Aplicada a Negócios</title>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>IA Business — Inteligência Artificial Aplicada a Negócios · Getúlio Vargas, RS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg:       #0d0d10;
-    --bg2:      #13131a;
-    --bg3:      #1a1a24;
-    --border:   rgba(255,255,255,0.08);
-    --accent:   oklch(62% 0.22 280);
-    --accent2:  oklch(62% 0.22 320);
-    --fg:       #f0eff5;
-    --fg2:      #a09db8;
-    --radius:   14px;
-  }
+:root {
+  --bg:      #050906;
+  --bg2:     rgba(8,16,10,0.85);
+  --bg3:     rgba(14,24,16,0.9);
+  --border:  rgba(80,200,120,0.12);
+  --accent:  oklch(66% 0.21 148);
+  --accent2: oklch(68% 0.18 172);
+  --fg:      #edf5f0;
+  --fg2:     #7da896;
+  --r:       14px;
+}
 
-  html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+h1,h2,h3,h4 { font-family: 'Syne', sans-serif; line-height: 1.15; }
 
-  body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: 'Inter', sans-serif;
-    font-size: 16px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
+/* 3D CANVAS */
+#bg-canvas {
+  position: fixed; inset: 0; z-index: 0;
+  width: 100%; height: 100%; pointer-events: none;
+}
+#page { position: relative; z-index: 1; }
 
-  h1, h2, h3, h4 { font-family: 'Syne', sans-serif; line-height: 1.2; }
+/* INTRO */
+#intro {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+  transition: opacity 1.2s ease, visibility 1.2s ease;
+}
+#intro.done { opacity: 0; visibility: hidden; pointer-events: none; }
 
-  /* ---- UTILITY ---- */
-  .container { max-width: 860px; margin: 0 auto; padding: 0 20px; }
-  .tag {
-    display: inline-block;
-    background: rgba(138,103,255,0.15);
-    border: 1px solid rgba(138,103,255,0.3);
-    color: var(--accent);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 5px 14px;
-    border-radius: 100px;
-    margin-bottom: 18px;
-  }
-  .btn {
-    display: inline-block;
-    background: var(--accent);
-    color: #fff;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 17px;
-    padding: 17px 40px;
-    border-radius: 100px;
-    text-decoration: none;
-    transition: filter 0.2s, transform 0.15s;
-    cursor: pointer;
-    border: none;
-    width: 100%;
-    text-align: center;
-  }
-  .btn:hover { filter: brightness(1.12); transform: translateY(-2px); }
-  .btn-ghost {
-    background: transparent;
-    border: 2px solid var(--accent);
-    color: var(--accent);
-  }
-  .divider { height: 1px; background: var(--border); margin: 60px 0; }
+#intro-bg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
-  /* ---- NAV ---- */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(13,13,16,0.85);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 20px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .nav-logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800; font-size: 18px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .nav-cta {
-    background: var(--accent);
-    color: #fff;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700; font-size: 13px;
-    padding: 9px 22px; border-radius: 100px;
-    text-decoration: none;
-    transition: filter 0.2s;
-  }
-  .nav-cta:hover { filter: brightness(1.1); }
+#intro-ui {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 36px;
+  padding: 24px;
+  text-align: center;
+}
 
-  /* ---- HERO ---- */
-  .hero {
-    padding: 130px 20px 80px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
-    width: 700px; height: 700px;
-    background: radial-gradient(ellipse, oklch(62% 0.22 280 / 0.18) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .hero h1 {
-    font-size: clamp(32px, 6vw, 58px);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    margin-bottom: 22px;
-    text-wrap: pretty;
-  }
-  .hero h1 em {
-    font-style: normal;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .hero p {
-    font-size: clamp(16px, 2.5vw, 19px);
-    color: var(--fg2);
-    max-width: 580px;
-    margin: 0 auto 40px;
-    text-wrap: pretty;
-  }
-  .price-block {
-    display: inline-flex; flex-direction: column; align-items: center;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px 40px 28px;
-    margin-bottom: 28px;
-    gap: 4px;
-  }
-  .price-old {
-    font-size: 14px; color: var(--fg2);
-    text-decoration: line-through;
-  }
-  .price-main {
-    font-family: 'Syne', sans-serif;
-    font-size: 42px; font-weight: 800;
-    color: var(--fg);
-  }
-  .price-main span { font-size: 22px; font-weight: 600; color: var(--fg2); }
-  .price-note { font-size: 13px; color: var(--fg2); }
-  .hero-cta-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .hero-cta-wrap .btn { max-width: 360px; }
-  .security-note {
-    font-size: 12px; color: var(--fg2);
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .security-note svg { flex-shrink: 0; }
+.intro-label {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(11px, 2.5vw, 13px);
+  font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent); opacity: 0.7;
+}
 
-  /* ---- STATS BAR ---- */
-  .stats-bar {
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    padding: 28px 20px;
-  }
-  .stats-bar .container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    text-align: center;
-  }
-  .stat-item h3 {
-    font-size: 26px; font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .stat-item p { font-size: 13px; color: var(--fg2); margin-top: 4px; }
+.intro-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(26px, 6vw, 54px);
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.1;
+  color: var(--fg);
+  text-wrap: pretty;
+}
+.intro-title em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
 
-  /* ---- SECTION ---- */
-  section { padding: 70px 20px; }
-  .section-header { text-align: center; margin-bottom: 48px; }
-  .section-header h2 { font-size: clamp(24px, 4vw, 38px); font-weight: 800; margin-bottom: 12px; }
-  .section-header p { color: var(--fg2); font-size: 17px; max-width: 500px; margin: 0 auto; }
+.intro-sub {
+  font-size: clamp(13px, 2.5vw, 16px);
+  color: var(--fg2); max-width: 340px; line-height: 1.6;
+}
 
-  /* ---- LEARN LIST ---- */
-  .learn-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-  }
-  .learn-item {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 22px;
-    display: flex; gap: 14px;
-    transition: border-color 0.2s;
-  }
-  .learn-item:hover { border-color: rgba(138,103,255,0.3); }
-  .learn-num {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px; font-weight: 700;
-    color: var(--accent);
-    background: rgba(138,103,255,0.12);
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .learn-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-  .learn-item p { font-size: 14px; color: var(--fg2); line-height: 1.5; }
+/* THE ORB */
+#orb-wrap {
+  position: relative;
+  width: clamp(160px, 38vw, 220px);
+  height: clamp(160px, 38vw, 220px);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
 
-  /* ---- VIDEO ---- */
-  .video-section { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .video-wrap {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    overflow: hidden;
-    aspect-ratio: 16/9;
-    display: flex; align-items: center; justify-content: center;
-    position: relative;
-  }
-  .video-placeholder {
-    display: flex; flex-direction: column; align-items: center; gap: 16px;
-    color: var(--fg2);
-  }
-  .play-btn {
-    width: 72px; height: 72px;
-    background: var(--accent);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 0.2s, filter 0.2s;
-    cursor: pointer;
-  }
-  .play-btn:hover { transform: scale(1.08); filter: brightness(1.15); }
-  .play-btn svg { margin-left: 4px; }
+#orb-ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 1.5px solid oklch(66% 0.21 148 / 0.25);
+  animation: orbRingSpin 8s linear infinite;
+}
+@keyframes orbRingSpin {
+  to { transform: rotate(360deg); }
+}
 
-  /* ---- WHY ---- */
-  .why-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 20px;
-  }
-  .why-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px 22px;
-    transition: border-color 0.2s;
-  }
-  .why-card:hover { border-color: rgba(138,103,255,0.3); }
-  .why-icon {
-    width: 44px; height: 44px;
-    background: rgba(138,103,255,0.12);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-    font-size: 22px;
-  }
-  .why-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
-  .why-card p { font-size: 14px; color: var(--fg2); line-height: 1.6; }
+#orb-ring::before {
+  content: '';
+  position: absolute; top: -4px; left: 50%; margin-left: -4px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
 
-  /* ---- COURSE DETAILS ---- */
-  .details-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-  }
-  .detail-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    text-align: center;
-  }
-  .detail-card .val {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px; font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .detail-card .lbl { font-size: 13px; color: var(--fg2); margin-top: 4px; }
+#orb-ring2 {
+  position: absolute; inset: 14px; border-radius: 50%;
+  border: 1px solid oklch(66% 0.21 148 / 0.15);
+  animation: orbRingSpin 14s linear infinite reverse;
+}
+#orb-ring2::before {
+  content: '';
+  position: absolute; bottom: -3px; right: 20%; 
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent2);
+  box-shadow: 0 0 8px var(--accent2);
+}
 
-  /* ---- PRICING ---- */
-  .pricing-card {
-    background: var(--bg2);
-    border: 1px solid rgba(138,103,255,0.4);
-    border-radius: 20px;
-    padding: 40px 32px;
-    max-width: 440px;
-    margin: 0 auto;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .pricing-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-  }
-  .pricing-badge {
-    display: inline-block;
-    background: rgba(138,103,255,0.15);
-    border: 1px solid rgba(138,103,255,0.3);
-    color: var(--accent);
-    font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 4px 14px; border-radius: 100px;
-    margin-bottom: 20px;
-  }
-  .pricing-card h3 { font-size: 22px; margin-bottom: 6px; }
-  .pricing-card .sub { font-size: 14px; color: var(--fg2); margin-bottom: 24px; }
-  .pricing-card .price-old { font-size: 15px; margin-bottom: 4px; }
-  .pricing-card .price-main { font-size: 52px; margin-bottom: 6px; }
-  .pricing-card .price-note { margin-bottom: 28px; }
-  .pricing-card .btn { margin-bottom: 16px; }
-  .pricing-features { list-style: none; text-align: left; display: flex; flex-direction: column; gap: 10px; margin-top: 28px; border-top: 1px solid var(--border); padding-top: 24px; }
-  .pricing-features li { display: flex; gap: 10px; font-size: 14px; color: var(--fg2); }
-  .pricing-features li::before { content: '✓'; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+#orb-core {
+  position: absolute; inset: 28px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%,
+    oklch(66% 0.21 148 / 0.18) 0%,
+    oklch(66% 0.21 148 / 0.04) 60%,
+    transparent 100%);
+  border: 1px solid oklch(66% 0.21 148 / 0.3);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.3s cubic-bezier(.22,1,.36,1),
+              box-shadow 0.3s, background 0.3s;
+}
 
-  /* ---- FACILITATOR ---- */
-  .facilitator-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 40px 32px;
-    max-width: 600px;
-    margin: 0 auto;
-    display: flex; gap: 32px; align-items: flex-start;
-  }
-  .facilitator-photo {
-    width: 100px; height: 100px;
-    border-radius: 50%;
-    background: var(--bg3);
-    border: 3px solid rgba(138,103,255,0.3);
-    flex-shrink: 0;
-    overflow: hidden;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 36px; color: var(--fg2);
-  }
-  .facilitator-info h3 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
-  .facilitator-role { font-size: 13px; color: var(--accent); font-weight: 600; margin-bottom: 14px; letter-spacing: 0.04em; text-transform: uppercase; }
-  .facilitator-info p { font-size: 15px; color: var(--fg2); line-height: 1.7; }
+#orb-core:hover, #orb-wrap.touching #orb-core {
+  transform: scale(1.07);
+  box-shadow: 0 0 60px oklch(66% 0.21 148 / 0.4);
+  background: radial-gradient(circle at 38% 38%,
+    oklch(66% 0.21 148 / 0.32) 0%,
+    oklch(66% 0.21 148 / 0.08) 60%,
+    transparent 100%);
+}
 
-  /* ---- FINAL CTA ---- */
-  .final-cta {
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
-    text-align: center;
-    padding: 80px 20px;
-  }
-  .final-cta h2 { font-size: clamp(26px, 4vw, 42px); margin-bottom: 16px; }
-  .final-cta p { font-size: 17px; color: var(--fg2); margin-bottom: 36px; max-width: 480px; margin-left: auto; margin-right: auto; }
-  .final-cta .btn { max-width: 380px; margin: 0 auto 14px; }
+#orb-symbol {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(28px, 8vw, 48px);
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  transition: transform 0.3s;
+  line-height: 1;
+}
 
-  /* ---- FOOTER ---- */
-  footer {
-    text-align: center;
-    padding: 28px 20px;
-    font-size: 13px;
-    color: var(--fg2);
-    border-top: 1px solid var(--border);
-  }
+#orb-pulse {
+  position: absolute; inset: 28px; border-radius: 50%;
+  border: 2px solid oklch(66% 0.21 148 / 0.6);
+  animation: orbPulseAnim 2.2s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes orbPulseAnim {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
 
-  /* ---- ANIMATIONS ---- */
+#orb-glow {
+  position: absolute; inset: -30px; border-radius: 50%;
+  background: radial-gradient(circle, oklch(66% 0.21 148 / 0.12) 0%, transparent 70%);
+  animation: orbGlowBreath 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes orbGlowBreath {
+  0%,100% { transform: scale(0.9); opacity: 0.6; }
+  50%     { transform: scale(1.1); opacity: 1; }
+}
 
-  /* Hero glow pulse */
-  @keyframes glowPulse {
-    0%, 100% { opacity: 0.18; transform: translateX(-50%) scale(1); }
-    50%       { opacity: 0.30; transform: translateX(-50%) scale(1.12); }
-  }
-  .hero::before { animation: glowPulse 6s ease-in-out infinite; }
+.intro-cta-hint {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  animation: hintFloat 2.5s ease-in-out infinite;
+}
+@keyframes hintFloat {
+  0%,100% { transform: translateY(0); opacity: 0.7; }
+  50%     { transform: translateY(-5px); opacity: 1; }
+}
+.cta-hint-text {
+  font-size: 13px; color: var(--fg2); letter-spacing: 0.04em;
+}
+.cta-hint-arrow {
+  width: 1px; height: 28px;
+  background: linear-gradient(to bottom, var(--accent), transparent);
+  margin: 0 auto;
+}
 
-  /* Hero orbs */
-  .hero-orb {
-    position: absolute; border-radius: 50%; pointer-events: none;
-    filter: blur(80px); opacity: 0;
-    animation: orbFloat 0.8s ease forwards;
-  }
-  .hero-orb-1 {
-    width: 320px; height: 320px;
-    background: oklch(62% 0.22 280 / 0.15);
-    top: 60px; left: -80px;
-    animation-delay: 0.3s;
-  }
-  .hero-orb-2 {
-    width: 260px; height: 260px;
-    background: oklch(62% 0.22 320 / 0.12);
-    top: 100px; right: -60px;
-    animation-delay: 0.5s;
-  }
-  @keyframes orbFloat {
-    to { opacity: 1; }
-  }
+/* Intro success overlay */
+#intro-success {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  opacity: 0; pointer-events: none; transition: opacity 0.5s;
+  background: var(--bg);
+}
+#intro-success.show { opacity: 1; }
+.success-icon {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; color: #000; font-weight: 700;
+  animation: successPop 0.6s cubic-bezier(.22,1,.36,1);
+}
+@keyframes successPop {
+  from { transform: scale(0) rotate(-20deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0); opacity: 1; }
+}
+.success-text {
+  font-family: 'Syne', sans-serif; font-size: clamp(18px, 4vw, 26px); font-weight: 800;
+  color: var(--fg); letter-spacing: -0.01em;
+}
+.success-sub {
+  font-size: 14px; color: var(--fg2);
+}
 
-  /* CTA pulse ring */
-  @keyframes ring {
-    0%   { box-shadow: 0 0 0 0 oklch(62% 0.22 280 / 0.5); }
-    70%  { box-shadow: 0 0 0 14px oklch(62% 0.22 280 / 0); }
-    100% { box-shadow: 0 0 0 0   oklch(62% 0.22 280 / 0); }
-  }
-  .btn-pulse { animation: ring 2.2s ease-out infinite; }
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
+  background: rgba(5,9,6,0.7); backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%);
+  transition: transform 0.7s cubic-bezier(.22,1,.36,1), box-shadow 0.3s;
+}
+nav.show { transform: translateY(0); }
+nav.scrolled { box-shadow: 0 4px 40px rgba(0,0,0,0.6); }
+.nav-logo {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.nav-cta {
+  background: var(--accent); color: #000;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+  padding: 9px 22px; border-radius: 100px; text-decoration: none;
+  transition: filter 0.2s, transform 0.15s;
+}
+.nav-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-  /* Scroll reveal */
-  .reveal {
-    opacity: 0;
-    transform: translateY(32px);
-    transition: opacity 0.65s cubic-bezier(.22,1,.36,1), transform 0.65s cubic-bezier(.22,1,.36,1);
-  }
-  .reveal.visible { opacity: 1; transform: translateY(0); }
+/* UTILITY */
+.container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+.tag {
+  display: inline-block;
+  background: oklch(66% 0.21 148 / 0.1);
+  border: 1px solid oklch(66% 0.21 148 / 0.3);
+  color: var(--accent); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 100px; margin-bottom: 16px;
+}
+.btn {
+  display: block; width: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #000; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px;
+  padding: 18px 40px; border-radius: 100px;
+  text-decoration: none; text-align: center; border: none; cursor: pointer;
+  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.btn:hover { filter: brightness(1.1); transform: translateY(-3px); box-shadow: 0 16px 40px oklch(66% 0.21 148 / 0.35); }
+.pulse { animation: pulse 2.4s ease-out infinite; }
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0    oklch(66% 0.21 148 / 0.55); }
+  70%  { box-shadow: 0 0 0 18px oklch(66% 0.21 148 / 0); }
+  100% { box-shadow: 0 0 0 0    oklch(66% 0.21 148 / 0); }
+}
+.lock { font-size: 12px; color: var(--fg2); display: flex; align-items: center; gap: 6px; }
+.glass  { background: rgba(8,16,10,0.75); border: 1px solid var(--border); backdrop-filter: blur(16px); }
+.glass2 { background: rgba(12,22,14,0.9);  border: 1px solid rgba(80,200,120,0.2); backdrop-filter: blur(20px); }
 
-  /* Stagger children */
-  .stagger > * {
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.55s cubic-bezier(.22,1,.36,1), transform 0.55s cubic-bezier(.22,1,.36,1);
-  }
-  .stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay:0s; }
-  .stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay:0.08s; }
-  .stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay:0.16s; }
-  .stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay:0.24s; }
-  .stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay:0.32s; }
-  .stagger.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay:0.40s; }
+/* SCROLL ANIM */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(22px); }
+  to   { opacity:1; transform:none; }
+}
+[data-anim] {
+  opacity: 0;
+  transition: opacity 0.85s cubic-bezier(.22,1,.36,1), transform 0.85s cubic-bezier(.22,1,.36,1);
+}
+[data-anim="up"]   { transform: translateY(50px) rotateX(6deg); }
+[data-anim="left"] { transform: translateX(-60px) rotateY(-6deg); }
+[data-anim="right"]{ transform: translateX(60px)  rotateY(6deg); }
+[data-anim="zoom"] { transform: scale(0.88) translateY(20px); }
+[data-anim="fade"] { transform: none; }
+[data-anim].in { opacity: 1 !important; transform: none !important; }
+[data-d="1"] { transition-delay:.08s; } [data-d="2"] { transition-delay:.16s; }
+[data-d="3"] { transition-delay:.24s; } [data-d="4"] { transition-delay:.32s; }
+[data-d="5"] { transition-delay:.40s; } [data-d="6"] { transition-delay:.48s; }
 
-  /* Hero text fade up */
-  .hero-line {
-    opacity: 0;
-    transform: translateY(24px);
-    animation: heroIn 0.7s cubic-bezier(.22,1,.36,1) forwards;
-  }
-  .hero-line:nth-child(1) { animation-delay: 0.05s; }
-  .hero-line:nth-child(2) { animation-delay: 0.15s; }
-  .hero-line:nth-child(3) { animation-delay: 0.25s; }
-  .hero-line:nth-child(4) { animation-delay: 0.38s; }
-  .hero-line:nth-child(5) { animation-delay: 0.52s; }
-  @keyframes heroIn {
-    to { opacity: 1; transform: translateY(0); }
-  }
+/* TILT */
+.tilt { transform-style: preserve-3d; will-change: transform; transition: transform 0.12s ease, box-shadow 0.2s; }
+.tilt:hover { box-shadow: 0 20px 60px oklch(66% 0.21 148 / 0.15); }
 
-  /* Nav slide in */
-  nav { animation: navIn 0.5s ease forwards; }
-  @keyframes navIn {
-    from { transform: translateY(-100%); opacity: 0; }
-    to   { transform: translateY(0);    opacity: 1; }
-  }
+/* HERO */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 130px 24px 90px;
+}
+.hero-content { max-width: 740px; }
+.hero h1 {
+  font-size: clamp(36px,6.5vw,68px); font-weight: 800;
+  letter-spacing: -0.025em; margin-bottom: 24px; text-wrap: pretty;
+  opacity: 0; animation: fadeUp 0.8s 0.3s cubic-bezier(.22,1,.36,1) forwards;
+}
+.accent-text {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-style: normal;
+}
+.hero p {
+  font-size: clamp(16px,2.2vw,19px); color: var(--fg2);
+  max-width: 540px; margin: 0 auto 44px; text-wrap: pretty;
+  opacity: 0; animation: fadeUp 0.8s 0.5s cubic-bezier(.22,1,.36,1) forwards;
+}
+.price-pill {
+  display: inline-flex; flex-direction: column; align-items: center;
+  border-radius: 20px; padding: 22px 44px 24px; margin-bottom: 30px;
+  opacity: 0; animation: fadeUp 0.8s 0.65s cubic-bezier(.22,1,.36,1) forwards;
+}
+.price-pill .old  { font-size:13px; color:var(--fg2); text-decoration:line-through; }
+.price-pill .main { font-family:'Syne',sans-serif; font-size:48px; font-weight:800; line-height:1; margin:6px 0; }
+.price-pill .main span { font-size:20px; font-weight:500; color:var(--fg2); }
+.price-pill .note { font-size:12px; color:var(--fg2); }
+.hero-acts {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  opacity: 0; animation: fadeUp 0.8s 0.8s cubic-bezier(.22,1,.36,1) forwards;
+}
+.hero-acts .btn { max-width: 360px; }
 
-  /* Stat counter */
-  .stat-item h3 { transition: transform 0.3s; }
-  .stat-item:hover h3 { transform: scale(1.1); }
+/* STATS */
+.stats-bar {
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  padding:32px 24px; background:rgba(5,9,6,0.6); backdrop-filter:blur(16px);
+}
+.stats-bar .container { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; text-align:center; }
+.stat h3 {
+  font-size:clamp(24px,4vw,36px); font-weight:800;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.stat p { font-size:13px; color:var(--fg2); margin-top:4px; }
 
-  /* Card hover lift */
-  .learn-item, .why-card, .detail-card {
-    transition: border-color 0.2s, transform 0.25s, box-shadow 0.25s;
-  }
-  .learn-item:hover, .why-card:hover, .detail-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(138,103,255,0.12);
-  }
+/* SECTION */
+section { padding:80px 24px; }
+.s-hd { text-align:center; margin-bottom:52px; }
+.s-hd h2 { font-size:clamp(26px,4vw,42px); font-weight:800; margin-bottom:12px; }
+.s-hd p  { color:var(--fg2); font-size:17px; max-width:500px; margin:0 auto; }
 
-  /* Gradient text shimmer on h1 */
-  @keyframes shimmer {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  .hero h1 em {
-    background: linear-gradient(135deg, oklch(62% 0.22 280), oklch(70% 0.2 320), oklch(62% 0.22 260), oklch(70% 0.2 320));
-    background-size: 300% 300%;
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: shimmer 5s ease infinite;
-  }
+/* LEARN */
+.learn-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(275px,1fr)); gap:16px; perspective:800px; }
+.learn-card { border-radius:var(--r); padding:24px; display:flex; gap:16px; align-items:flex-start; cursor:default; }
+.num { font-family:'Syne',sans-serif; font-size:12px; font-weight:800; background:oklch(66% 0.21 148/0.12); color:var(--accent); width:34px; height:34px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.learn-card h4 { font-size:15px; font-weight:700; margin-bottom:5px; }
+.learn-card p  { font-size:14px; color:var(--fg2); line-height:1.5; }
 
-  /* Pricing card glow */
-  .pricing-card {
-    transition: box-shadow 0.4s;
-    animation: cardGlow 3s ease-in-out infinite;
-  }
-  @keyframes cardGlow {
-    0%, 100% { box-shadow: 0 0 0 0 oklch(62% 0.22 280 / 0); }
-    50%       { box-shadow: 0 0 40px oklch(62% 0.22 280 / 0.15); }
-  }
+/* VIDEO */
+.video-wrap { position:relative; border-radius:20px; overflow:hidden; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; box-shadow:0 0 100px oklch(66% 0.21 148/0.1); cursor:pointer; }
+.video-wrap video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.video-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:linear-gradient(180deg, rgba(5,9,6,0.15) 0%, rgba(5,9,6,0.55) 100%); transition:opacity 0.4s; z-index:2; }
+.video-wrap.playing .video-overlay { opacity:0; pointer-events:none; }
+.play-btn { width:84px; height:84px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.2s; animation:pulse 2.4s ease-out infinite; }
+.video-wrap:hover .play-btn { transform:scale(1.1); }
+.play-btn svg { margin-left:5px; }
+.video-caption { font-size:14px; color:#fff; font-weight:600; letter-spacing:0.02em; text-shadow:0 2px 12px rgba(0,0,0,0.5); }
 
-  /* Floating badge */
-  @keyframes badgeFloat {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-4px); }
-  }
-  .pricing-badge { animation: badgeFloat 3s ease-in-out infinite; display: inline-block; }
+/* WHY */
+.why-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; perspective:800px; }
+.why-card { border-radius:var(--r); padding:30px 26px; cursor:default; }
+.w-icon { width:48px; height:48px; border-radius:12px; background:oklch(66% 0.21 148/0.1); display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:18px; }
+.why-card h4 { font-size:16px; font-weight:700; margin-bottom:8px; }
+.why-card p  { font-size:14px; color:var(--fg2); line-height:1.65; }
 
-  /* ---- MOBILE ---- */
-  @media (max-width: 600px) {
-    nav { padding: 12px 16px; }
-    .hero { padding: 100px 16px 60px; }
-    .price-block { padding: 20px 28px 24px; }
-    .stats-bar .container { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .stat-item h3 { font-size: 20px; }
-    .learn-grid { grid-template-columns: 1fr; }
-    .why-grid { grid-template-columns: 1fr; }
-    .details-grid { grid-template-columns: repeat(2, 1fr); }
-    .facilitator-card { flex-direction: column; align-items: center; text-align: center; padding: 28px 20px; gap: 20px; }
-    .pricing-card { padding: 28px 20px; }
-    section { padding: 50px 16px; }
-  }
+/* DETAILS */
+.det-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; max-width:480px; margin:0 auto; perspective:600px; }
+.det-card { border-radius:var(--r); padding:22px; text-align:center; cursor:default; }
+.det-card .val { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.det-card .lbl { font-size:13px; color:var(--fg2); margin-top:6px; }
+
+/* PRICING */
+.p-wrap { max-width:440px; margin:0 auto; }
+.p-card { border-radius:22px; padding:44px 36px; text-align:center; position:relative; overflow:hidden; animation:pglow 4s ease-in-out infinite; }
+@keyframes pglow { 0%,100%{box-shadow:0 0 0 0 oklch(66% 0.21 148/0)} 50%{box-shadow:0 0 80px oklch(66% 0.21 148/0.2)} }
+.p-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--accent),var(--accent2)); }
+.p-badge { display:inline-block; margin-bottom:22px; background:oklch(66% 0.21 148/0.1); border:1px solid oklch(66% 0.21 148/0.3); color:var(--accent); font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:5px 16px; border-radius:100px; animation:floatB 3s ease-in-out infinite; }
+@keyframes floatB { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+.p-card h3   { font-size:22px; margin-bottom:6px; }
+.p-card .sub { font-size:14px; color:var(--fg2); margin-bottom:28px; }
+.p-card .old { font-size:14px; color:var(--fg2); text-decoration:line-through; }
+.p-card .main{ font-family:'Syne',sans-serif; font-size:56px; font-weight:800; }
+.p-card .main span { font-size:22px; font-weight:500; color:var(--fg2); }
+.p-card .note{ font-size:13px; color:var(--fg2); margin:4px 0 30px; }
+.p-card .btn { margin-bottom:14px; }
+.feats { list-style:none; text-align:left; border-top:1px solid var(--border); padding-top:24px; margin-top:24px; display:flex; flex-direction:column; gap:10px; }
+.feats li { display:flex; gap:10px; font-size:14px; color:var(--fg2); }
+.feats li::before { content:'✓'; color:var(--accent); font-weight:700; flex-shrink:0; }
+
+/* FACILITATOR */
+.fac { border-radius:22px; padding:44px 36px; display:flex; gap:36px; align-items:center; max-width:640px; margin:0 auto; }
+.fac-photo { width:130px; height:130px; border-radius:50%; border:3px solid oklch(66% 0.21 148/0.4); flex-shrink:0; background:rgba(14,24,16,0.8); overflow:hidden; position:relative; box-shadow:0 0 40px oklch(66% 0.21 148/0.2); }
+.fac-photo img { width:100%; height:100%; object-fit:cover; object-position:center 20%; display:block; }
+.fac-info h3   { font-size:24px; font-weight:800; margin-bottom:4px; }
+.fac-role { font-size:12px; color:var(--accent); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:14px; }
+.fac-info p { font-size:15px; color:var(--fg2); line-height:1.75; }
+
+/* FINAL */
+.final { border-top:1px solid var(--border); text-align:center; padding:90px 24px; background:rgba(5,9,6,0.5); backdrop-filter:blur(16px); }
+.final h2 { font-size:clamp(28px,4vw,46px); margin-bottom:14px; }
+.final p  { font-size:17px; color:var(--fg2); margin:0 auto 36px; max-width:460px; }
+.final .btn { max-width:380px; margin:0 auto 16px; }
+
+footer { text-align:center; padding:28px 24px; font-size:13px; color:var(--fg2); border-top:1px solid var(--border); background:rgba(5,9,6,0.4); }
+
+@media (max-width:640px) {
+  /* Nav */
+  nav { padding:12px 16px; }
+  .nav-logo { font-size:15px; }
+  .nav-cta  { font-size:12px; padding:8px 16px; }
+
+  /* Hero */
+  .hero { padding:96px 16px 56px; }
+  .hero h1 { font-size: clamp(28px,8vw,42px); }
+  .price-pill { padding:16px 20px 18px; width:100%; }
+  .price-pill .main { font-size: 40px; }
+  .hero-acts .btn { max-width:100%; font-size:15px; padding:16px 24px; }
+
+  /* Stats */
+  .stats-bar .container { grid-template-columns:1fr; gap:20px; }
+  .stat h3 { font-size:32px; }
+
+  /* Sections */
+  section { padding:52px 16px; }
+  .s-hd { margin-bottom:36px; }
+  .s-hd h2 { font-size: clamp(22px,6vw,30px); }
+  .s-hd p  { font-size:15px; }
+
+  /* Learn cards */
+  .learn-grid { grid-template-columns:1fr; gap:12px; }
+  .learn-card { padding:18px; }
+
+  /* Why grid */
+  .why-grid { grid-template-columns:1fr; gap:14px; }
+  .why-card { padding:22px 18px; }
+
+  /* Details */
+  .det-grid { grid-template-columns:1fr 1fr; gap:10px; max-width:100%; }
+  .det-card { padding:18px 12px; }
+  .det-card .val { font-size:26px; }
+
+  /* Pricing */
+  .p-wrap { max-width:100%; }
+  .p-card { padding:28px 18px; }
+  .p-card .main { font-size:44px; }
+  .feats li { font-size:13px; }
+
+  /* Facilitador */
+  .fac { flex-direction:column; align-items:center; text-align:center; padding:26px 18px; gap:18px; max-width:100%; }
+  .fac-photo { width:110px; height:110px; }
+  .fac-info p { font-size:14px; }
+
+  /* Form */
+  .p-card input { font-size:16px; /* prevents iOS zoom */ }
+
+  /* Final */
+  .final { padding:64px 16px; }
+  .final h2 { font-size: clamp(22px,6vw,32px); }
+  .final .btn { max-width:100%; }
+
+  /* Intro orb */
+  #orb-wrap { width:160px; height:160px; }
+  .intro-title { font-size:clamp(22px,7vw,32px); }
+}
 </style>
-<style type="text/css">:root img[width="728"][height="90"], :root [href="https://adstub.net/cina777/"], :root [href="https://adstub.net/arab777/"], :root [href="https://adstub.net/ratu89/"], :root [href="https://adstub.net/judi89/"], :root [href^="//mage98rquewz.com/"], :root [href^="//x4pollyxxpush.com/"], :root span[id^="ezoic-pub-ad-placeholder-"], :root ins.adsbygoogle[data-ad-slot], :root ins.adsbygoogle[data-ad-client], :root img[src^="https://s-img.adskeeper.com/"], :root guj-ad, :root gpt-ad, :root div[ow-ad-unit-wrapper], :root div[id^="zergnet-widget"], :root div[id^="vuukle-ad-"], :root div[id^="taboola-stream-"], :root div[id^="sticky_ad_"], :root div[id^="st"][style^="z-index: 999999999;"], :root div[id^="rc-widget-"], :root div[id^="mrec-leaderboard-"], :root div[id^="gpt_ad_"], :root div[id^="ezoic-pub-ad-"], :root div[id^="dfp-ad-"], :root div[id^="crt-"][style], :root div[id^="apn_native_ad_slot_"], :root div[id^="adspot-"], :root div[id^="adrotate_widgets-"], :root ps-connatix-module, :root div[id^="ad_position_"], :root div[id^="ad-div-"], :root div[id*="ScriptRoot"], :root div[id*="MarketGid"], :root [href="https://adstub.net/rusia777/"], :root div[data-id-advertdfpconf], :root div[data-dfp-id], :root hl-adsense, :root div[data-contentexchange-widget], :root div[data-alias="300x250 Ad 2"], :root div[data-adunit-path], :root div[data-adname], :root div[data-ad-placeholder], :root a[href^="https://osfultrbriolenai.info/"], :root div[class^="Adstyled__AdWrapper-"], :root a[href^="https://go.xlviiirdr.com"], :root div[class$="-adlabel"], :root display-ads, :root a[href^="https://go.grinsbest.com/"], :root citrus-ad-wrapper, :root a[href^="https://s.zlinkd.com/"], :root bottomadblock, :root amp-fx-flying-carpet, :root amp-embed[type="taboola"], :root amp-connatix-player, :root div[id^="google_dfp_"], :root ad-slot, :root a[href^="https://www.purevpn.com/"][href*="&utm_source=aff-"], :root a[href^="https://www.privateinternetaccess.com/"] > img, :root a[href^="https://www.onlineusershielder.com/"], :root a[href^="https://financeads.net/tc.php?"], :root a[href^="https://www.mrskin.com/tour"], :root a[href^="https://www.infowarsstore.com/"] > img, :root a[href^="https://ak.psaltauw.net/"], :root broadstreet-zone-container, :root a[href^="https://www.highperformancecpmgate.com/"], :root amp-ad, :root a[href^="https://www.highcpmrevenuenetwork.com/"], :root a[href^="https://www.get-express-vpn.com/offer/"], :root a[href^="https://lnkxt.bannerator.com/"], :root a[href^="https://www.geekbuying.com/dynamic-ads/"], :root [href^="https://groorsoa.net/"], :root a[href^="https://www.financeads.net/tc.php?"], :root a[href^="https://www.effectiveratecpm.com/"], :root [href^="https://www.herbanomic.com/"] > img, :root a[href^="https://www.dql2clk.com/"], :root a[href^="https://www.nutaku.net/signup/landing/"], :root a[href^="https://www.dating-finder.com/signup/?ai_d="], :root a[href^="https://explore-site.com/"], :root a[href^="https://www.brazzersnetwork.com/landing/"], :root [data-template-type="nativead"], :root a[href^="https://www.adultempire.com/"][href*="?partner_id="], :root a[href^="https://voluum.prom-xcams.com/"], :root a[href^="https://twinrdsyte.com/"], :root a[href^="https://twinrdsrv.com/"], :root a[href^="https://syndicate.contentsserved.com/"], :root div[data-alias="300x250 Ad 1"], :root a[href^="https://trk.nfl-online-streams.club/"], :root a[href^="https://tracking.avapartner.com/"], :root a[href^="https://track.wg-aff.com"], :root a[href^="https://track.ultravpn.com/"], :root a[href^="https://track.afcpatrk.com/"], :root a[href^="https://track.adform.net/"], :root a[href^="https://torguard.net/aff.php"] > img, :root [data-identity="adhesive-ad"], :root a[href^="https://tc.tradetracker.net/"] > img, :root a[href^="https://tatrck.com/"], :root [href^="https://zstacklife.com/"] img, :root a[href^="https://click.candyoffers.com/"], :root a[href^="https://t.aslnk.link/"], :root a[onmousedown^="this.href='https://paid.outbrain.com/network/redir?"], :root a[href^="https://t.ajump1.com/"], :root a[href^="https://t.adating.link/"], :root a[href^="https://go.trackitalltheway.com/"], :root [href^="https://track.fiverr.com/visit/"] > img, :root a[href^="https://syndication.exoclick.com/"], :root a[href^="https://syndication.dynsrvtbg.com/"], :root .gnt_em_vp_c[data-g-s="vp_dk"], :root div[data-ad-wrapper], :root a[href^="https://svb-analytics.trackerrr.com/"], :root a[onmousedown^="this.href='https://paid.outbrain.com/network/redir?"] + .ob_source, :root a[href^="http://www.iyalc.com/"], :root a[href^="https://claring-loccelkin.com/"], :root a[href^="https://stardomcoit.com/"], :root a[href^="https://track.aftrk5.com/"], :root a[href^="https://slkmis.com/"], :root a[href^="https://myclick-2.com/"], :root a[href^="https://sexynearme.com/"], :root [data-ad-manager-id], :root a[href^="https://s.zlinkr.com/"], :root [href="https://adstub.net/gaza88/"], :root a[href^="https://ad.doubleclick.net/"], :root a[href^="https://static.fleshlight.com/images/banners/"], :root a[href^="https://s.zlink7.com/"], :root a[href^="https://s.ma3ion.com/"], :root a[href^="https://s.eunow4u.com/"], :root a[href^="https://random-affiliate.atimaze.com/"], :root #kt_player > div[style$="display: block;"][style*="inset: 0px;"], :root [href$="/sexdating.php"], :root a[href^="https://quotationfirearmrevision.com/"], :root a[href^="https://pubads.g.doubleclick.net/"], :root a[href^="https://prf.hn/click/"][href*="/camref:"] > img, :root a[href^="https://serve.awmdelivery.com/"], :root a[href^="https://www.dating-finder.com/?ai_d="], :root a[href^="https://prf.hn/click/"][href*="/adref:"] > img, :root [href^="https://ap.octopuspop.com/click/"] > img, :root app-ad, :root a[href^="https://postback1win.com/"], :root a[href^="https://a.adtng.com/"], :root a[href^="https://playnano.online/offerwalls/?ref="], :root a[href^="https://mmwebhandler.aff-online.com/"], :root a[href^="https://www.bet365.com/"][href*="affiliate="], :root a[href^="https://pb-track.com/"], :root a[href^="https://pb-front.com/"], :root a[href^="https://paid.outbrain.com/network/redir?"], :root a[href^="https://streamate.com/landing/click/"], :root a[href^="https://upsups.click/"], :root a[href^="https://ndt5.net/"], :root a[href^="https://natour.naughtyamerica.com/track/"], :root a[href^="https://mediaserver.entainpartners.com/renderBanner.do?"], :root [data-ad-name], :root a[href^="https://loboclick.com/"], :root a[href^="https://lead1.pl/"], :root a[href^="https://landing.brazzersnetwork.com/"], :root a[href^="https://juicyads.in/"], :root a[href^="https://snowdayonline.xyz/"], :root a[href^="https://join.dreamsexworld.com/"], :root a[href^="https://join.bannedsextapes.com/track/"], :root a[href^="https://jaxofuna.com/"], :root a[href^="https://italarizege.xyz/"], :root a[href^="https://identicaldrench.com/"], :root ad-shield-ads, :root a[href^="https://hot-growngames.life/"], :root a[href^="https://helmethomicidal.com/"], :root display-ad-component, :root a[href^="https://golinks.work/"], :root a[href^="https://s.zlinkn.com/"], :root a[href^="https://go.xxxvjmp.com/"], :root a[href^="https://go.xxxjmp.com"], :root a[href^="https://zirdough.net/"], :root [class^="tile-picker__CitrusBannerContainer-sc-"], :root a[href^="https://go.xxxiijmp.com"], :root a[href^="https://go.xtbaffiliates.com/"], :root [data-role="tile-ads-module"], :root a[href^="https://go.xlviirdr.com"], :root a[href^="https://go.xlivrdr.com"], :root a[href^="https://ismlks.com/"], :root [href^="https://www.mypillow.com/"] > img, :root a[href^="https://go.xlirdr.com"], :root [data-css-class="dfp-inarticle"], :root a[href^="https://go.tmrjmp.com"], :root a[href^="https://go.markets.com/visit/?bta="], :root a[href^="https://billing.purevpn.com/aff.php"] > img, :root a[href^="https://go.hpyrdr.com/"], :root a[href^="https://lijavaxa.com/"], :root a[href^="https://go.goaserv.com/"], :root app-large-ad, :root [href^="https://turtlebids.irauctions.com/"] img, :root div[data-adunit], :root a[href^="https://go.etoro.com/"] > img, :root a[href^="https://go.dmzjmp.com"], :root a[href^="https://www.bang.com/?aff="], :root #mgb-container > #mgb, :root a[href^="https://go.admjmp.com"], :root a[href^="https://get.surfshark.net/aff_c?"][href*="&aff_id="] > img, :root a[href^="https://datewhisper.life/"], :root a[href^="https://click.linksynergy.com/fs-bin/"] > img, :root a[href^="https://get-link.xyz/"], :root a[href^="https://www.mrskin.com/account/"], :root a[href^="https://www.adskeeper.com"], :root a[data-redirect^="https://paid.outbrain.com/network/redir?"], :root [href^="https://clicks.affstrack.com/"] > img, :root a[href^="https://engine.phn.doublepimp.com/"], :root a[href^="https://dl-protect.net/"], :root a[href*=".foxqck.com/"], :root a[href^="https://ctosrd.com/"], :root a[href^="https://go.bushheel.com/"], :root a[href^="https://ctjdwm.com/"], :root [href="//sexcams.plus/"], :root a[href^="https://camfapr.com/landing/click/"], :root a[href^="https://prf.hn/click/"][href*="/creativeref:"] > img, :root a[href*="&maxads="], :root a[href^="http://www.adultempire.com/unlimited/promo?"][href*="&partner_id="], :root a[href^="https://1betandgonow.com/"], :root a[href^="https://chaturbate.com/in/?"], :root a[href^="https://t.ajrkm1.com/"], :root a[href^="https://bongacams10.com/track?"], :root a[href*=".g2afse.com/"], :root a[href^="https://bodelen.com/"], :root a[href^="//hoodingluster.com/"], :root a[href^="https://black77854.com/"], :root a[href^="https://getmatchedlocally.com/"], :root app-advertisement, :root a[href^="https://rixofa.com/"], :root a[href^="https://best-experience-cool.com/"], :root [data-taboola-options], :root a[href^="https://believessway.com/"], :root a[href^="https://Click.ggpickaff.com/"], :root a[href^="https://banners.livepartners.com/"], :root a[href^="http://revolvemockerycopper.com/"], :root a[href^="https://awptjmp.com/"], :root a[href^="https://join.sexworld3d.com/track/"], :root a[href^="https://aweptjmp.com/"], :root a[href^="https://ausoafab.net/"], :root a[href^="https://clicks.pipaffiliates.com/"], :root a[href^="https://aj1070.online/"], :root a[href^="https://a.bestcontentoperation.top/"], :root a[href^="https://adultfriendfinder.com/go/"], :root a[href^="https://ads.planetwin365affiliate.com/"], :root a[href^="https://ads.leovegas.com/"], :root a[href^="https://go.xlvirdr.com"], :root img[src^="https://images.purevpnaffiliates.com"], :root a[href^="https://porntubemate.com/"], :root a[href^="https://click.dtiserv2.com/"], :root a[href^="https://clickadilla.com/"], :root a[href^="https://a.medfoodhome.com/"], :root a[href^="https://cam4com.go2cloud.org/"], :root .nya-slot[style], :root a[href^="https://a.bestcontentweb.top/"], :root atf-ad-slot, :root a[href^="https://a2.adform.net/"], :root a[href^="https://a.candyai.love/"], :root .banner-img > .pbl, :root [data-m-ad-id], :root a[href^="https://a-ads.com/"], :root a[href^="https://1winpb.com/"], :root div[id^="optidigital-adslot"], :root [href^="https://wsup.ai/"], :root a[href^="https://123-stream.org/"], :root a[href^="https://in.rabbtrk.com/"], :root a[href^="http://www.h4trck.com/"], :root [href^="https://a.acebet.com/api/click?"], :root a[href^="http://www.friendlyduck.com/AF_"], :root a[href^="http://partners.etoro.com/"], :root [href="https://chaturbate.jjgirls.com/"] > img, :root a[href^="http://cam4com.go2cloud.org/aff_c?"], :root a[href^="https://ads.betfair.com/redirect.aspx?"], :root amp-ad-custom, :root a[href^="http://trk.globwo.online/"], :root a[onclick^="window.location.replace('https://random-affiliate.atimaze.com/"], :root a[href^="https://bongacams2.com/track?"], :root a-ad, :root a[href^="https://offhandpump.com/"], :root a[href^="http://stickingrepute.com/"], :root #slashboxes > .deals-rail, :root div[aria-label="Ads"], :root [href^="http://mypillow.com/"] > img, :root a[href^="http://bongacams.com/track?"], :root a[href^="//startgaming.net/tienda/" i], :root a[href^="https://a.medfoodsafety.com/"], :root a[href^="//go.eabids.com/"], :root a[href^=" https://www.friendlyduck.com/AF_"], :root [data-cl-spot-id], :root a[href*="/jump/next.php?r="], :root a[href^="https://go.nordvpn.net/aff"] > img, :root .\[\&_\.gdprAdTransparencyCogWheelButton\]\:\!pjra-z-\[5\], :root [href^="http://clicks.totemcash.com/"], :root a[href^="https://ad.zanox.com/ppc/"] > img, :root [data-d-ad-id], :root a[href*=".engine.adglare.net/"], :root div[id^="lazyad-"], :root a[href^="http://com-1.pro/"], :root [href^="https://www.profitablegatecpm.com/"], :root a[href*=".cfm?domain="][href*="&fp="], :root a[href^="https://ab.advertiserurl.com/aff/"], :root a[data-oburl^="https://paid.outbrain.com/network/redir?"], :root [id^="section-ad-banner"], :root [id^="ad_slider"], :root a[href^="https://www.goldenfrog.com/vyprvpn?offer_id="][href*="&aff_id="], :root a[href^="https://wmctjd.com/"], :root a[href*="//jjgirls.com/sex/Chaturbate"], :root [id^="ad-wrap-"], :root [href^="https://zone.gotrackier.com/"], :root a[href^="http://sarcasmadvisor.com/"], :root [href^="https://www.restoro.com/"], :root a[href^="https://track.totalav.com/"], :root a[href^="https://ctrdwm.com/"], :root [href^="https://www.targetingpartner.com/"], :root a[href^="https://join.virtuallust3d.com/"], :root .section-subheader > .section-hotel-prices-header, :root [href^="https://www.hostg.xyz/"] > img, :root a[href^="https://bngpt.com/"], :root a[href^="https://www.sheetmusicplus.com/"][href*="?aff_id="], :root a[href^="http://adultfriendfinder.com/go/"], :root a[href^="https://fastestvpn.com/lifetime-special-deal?a_aid="], :root a[href^="https://tour.mrskin.com/"], :root div[id^="ad-position-"], :root a[href^="https://www.toprevenuegate.com/"], :root a[href^="https://bc.game/"], :root a[href^="http://join.brokestraightboys.com/track/"], :root div[id^="div-ads-"], :root [href^="https://rapidgator.net/article/premium/ref/"], :root [href^="https://join.girlsoutwest.com/"], :root a[href^="https://activate-game.com/"], :root .scroll-fixable.rail-right > .deals-rail, :root [data-wpas-zoneid], :root a[href^="https://track.aftrk3.com/"], :root [href^="https://join3.bannedsextapes.com"], :root div[data-adzone], :root div[id^="adngin-"], :root [data-rc-widget], :root span[data-ez-ph-id], :root [href^="https://track.aftrk1.com/"], :root [href^="https://join.playboyplus.com/track/"], :root a[href^="https://go.xxxijmp.com"], :root [href^="https://istlnkcl.com/"], :root a[href^="https://trk.softonixs.xyz/"], :root a[href^="https://iqbroker.com/"][href*="?aff="], :root [href^="https://rpwmct.com/"], :root [href^="https://wct.link/click?"], :root a[href^="https://t.acam.link/"], :root a[href^="https://go.strpjmp.com/"], :root [href^="https://url.totaladblock.com/"], :root a[href^="https://go.rmishe.com/"], :root [href^="https://ilovemyfreedoms.com/landing-"], :root [href="https://adstub.net/indo666/"], :root [href^="https://glersakr.com/"], :root a[href^="https://tm-offers.gamingadult.com/"], :root [href^="https://charmingdatings.life/"], :root [data-id^="div-gpt-ad"], :root a[href^="https://tracker.loropartners.com/"], :root [href^="https://awbbjmp.com/"], :root a[href^="https://www.friendlyduck.com/AF_"], :root [href^="https://ad1.adfarm1.adition.com/"], :root a[href^="https://t.ajrkm3.com/"], :root [href^="https://aads.com/campaigns/"], :root a[href^="https://fc.lc/ref/"], :root a[href^="https://go.bbrdbr.com"], :root a[href^="http://tc.tradetracker.net/"] > img, :root a[href^="https://s.zlink3.com/"], :root a[href^="http://sneakyadministration.com/"], :root [href^="https://www.brighteonstore.com/products/"] img, :root a[href^="https://bngprm.com/"], :root [href^="https://shiftnetwork.infusionsoft.com/go/"] > img, :root [href^="http://www.mypillow.com/"] > img, :root .ob_container .item-container-obpd, :root [id^="div-gpt-ad"], :root [href="https://jdrucker.com/gold"] > img, :root a[href^="https://join.virtualtaboo.com/track/"], :root [id^="ad_sky"], :root [name^="google_ads_iframe"], :root aside[id^="adrotate_widgets-"], :root a[href^="https://www.liquidfire.mobi/"], :root DFP-AD, :root .grid > .container > #aside-promotion, :root [data-type="ad-vertical"], :root [href^="https://go.xlrdr.com"], :root a[href^="https://s.cant3am.com/"], :root [data-testid^="taboola-"], :root [data-testid^="section-AdRowBillboard"], :root a[href^="https://track.1234sd123.com/"], :root zeus-ad, :root [data-testid="prism-ad-wrapper"], :root [href^="https://ad.admitad.com/"], :root [href^="https://mypillow.com/"] > img, :root [data-testid="ad_testID"], :root [data-mobile-ad-id], :root [data-dynamic-ads], :root a[href^="https://gamingadlt.com/?offer="], :root [data-desktop-ad-id], :root a[href^="https://go.rmhfrtnd.com"], :root a[href^="https://pb-imc.com/"], :root a[href^="https://www8.smartadserver.com/"], :root topadblock, :root a[href^="//s.zlinkd.com/"], :root [href^="https://mypatriotsupply.com/"] > img, :root [data-testid="adBanner-wrapper"], :root [href^="https://mylead.global/stl/"] > img, :root a[href*=".adsrv.eacdn.com/"], :root [href^="https://antiagingbed.com/discount/"] > img, :root #teaser1[style^="width:autopx;"], :root [href^="https://www.cloudways.com/en/?id"], :root [data-asg-ins], :root [data-block-type="ad"], :root [data-ad-width], :root a[href^="https://clickins.slixa.com/"], :root [onclick*="content.ad/"], :root a[href^="https://go.cmtaffiliates.com/"], :root [href^="https://optimizedelite.com/"] > img, :root div[data-ad-region], :root AMP-AD, :root [data-ad-cls], :root a[href^="https://www.adxsrve.com/"], :root a[href^="https://click.Ggpickaff.com/"], :root [data-ez-name], :root a[href^="https://go.mnaspm.com/"], :root a[href^="https://service.bv-aff-trx.com/"], :root a[href^="https://6-partner.com/"], :root [class^="s2nPlayer"], :root [href^="https://affiliate.fastcomet.com/"] > img, :root [class^="adDisplay-module"], :root a[href^="https://adclick.g.doubleclick.net/"], :root [data-freestar-ad][id], :root AD-SLOT, :root a[href^="https://combodef.com/"], :root a[href^="https://click.hoolig.app/"], :root a[href^="https://www.googleadservices.com/pagead/aclk?"] > img, :root [data-ad-module], :root a[href^="https://a.bestcontentfood.top/"], :root #kt_player > a[target="_blank"], :root a[href^="https://go.skinstrip.net"][href*="?campaignId="], :root #teaser2[style^="width:autopx;"], :root [data-revive-zoneid], :root a[href^="https://losingoldfry.com/"], :root div[id^="div-gpt-"], :root a[href^="https://gml-grp.com/"], :root .ob_dual_right > .ob_ads_header ~ .odb_div, :root div[data-ad-targeting], :root a[style="width:100%;height:100%;z-index:10000000000000000;position:absolute;top:0;left:0;"], :root [href^="https://www.avantlink.com/click.php"] img, :root [data-testid="commercial-label-taboola"], :root [class^="div-gpt-ad"], :root a[href^="https://traffdaq.com/"], :root #teaser3[style^="width:autopx;"], :root a[href^="https://go.hpyjmp.com"], :root iframe[scrolling="no"][sandbox*="allow-popups allow-modals"][style^="width: 100%; height: 100%; border: none;"], :root [href^="https://mystore.com/"] > img, :root [class^="amp-ad-"], :root a[href^="https://clixtrac.com/"], :root a[href^="https://wittered-mainging.com/"], :root #teaser3[style="width: 100%;text-align: center;display: scroll;position:fixed;bottom: 0;margin: 0 auto;z-index: 103;"] { display: none !important; }</style></head>
-<body style="cursor: crosshair;" data-cc-id="cc-1">
+</head>
+<body>
 
-<!-- NAV -->
-<nav>
-  <span class="nav-logo" style="font-weight: 600; color: rgb(42, 0, 255)">IA na Prática</span>
+<canvas id="bg-canvas"></canvas>
+
+<!-- INTRO INTERATIVO -->
+<div id="intro">
+  <canvas id="intro-bg"></canvas>
+  <div id="intro-ui">
+    <div class="intro-label">IA Business · Getúlio Vargas, RS</div>
+    <div class="intro-title">Você está a um toque<br>de se conectar ao <em>futuro</em></div>
+    <div class="intro-sub">A inteligência artificial já está transformando negócios. Sua vez começa agora.</div>
+
+    <div id="orb-wrap">
+      <div id="orb-glow"></div>
+      <div id="orb-ring"></div>
+      <div id="orb-ring2"></div>
+      <div id="orb-pulse"></div>
+      <div id="orb-core">
+        <div id="orb-symbol">IA</div>
+      </div>
+    </div>
+
+    <div class="intro-cta-hint" id="intro-hint">
+      <div class="cta-hint-arrow"></div>
+      <div class="cta-hint-text">Segure para conectar</div>
+    </div>
+
+    <div id="intro-success">
+      <div class="success-icon">✦</div>
+      <div class="success-text">Conexão estabelecida</div>
+      <div class="success-sub">Bem-vindo ao futuro</div>
+    </div>
+  </div>
+</div>
+
+<div id="page">
+
+<nav id="nav">
+  <span class="nav-logo">IA Business</span>
   <a href="#pricing" class="nav-cta">Quero me inscrever</a>
 </nav>
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-orb hero-orb-1"></div>
-  <div class="hero-orb hero-orb-2"></div>
-  <div class="container">
-    <div class="tag hero-line">Novo Treinamento</div>
-    <h1 class="hero-line">Inteligência Artificial<br><em>Aplicada a Negócios</em></h1>
-    <p class="hero-line">Aprenda a usar IA de forma estratégica para automatizar processos, tomar melhores decisões e crescer mais rápido — mesmo que você não tenha experiência técnica.</p>
-    <div class="price-block hero-line">
-      <span class="price-old">De R$ 499,00</span>
-      <div class="price-main"><span>R$&nbsp;</span>309</div>
-      <span class="price-note">Acesso vitalício · Começa quando você quiser</span>
+  <div class="hero-content">
+    <div class="tag" style="opacity:0;animation:fadeUp 0.5s 0.15s forwards;">Getúlio Vargas, RS · 100% Presencial</div>
+    <h1>Treinamento de Inteligência Artificial<br><em class="accent-text">Aplicada a Negócios</em></h1>
+    <p>Você já parou para pensar por que tantas empresas falam em IA, mas poucas realmente implementam? Falta gente qualificada. Aprenda IA agora e seja o profissional que as empresas estão procurando.</p>
+    <div class="price-pill glass">
+      <span class="old">De R$ 540,00</span>
+      <div class="main"><span>R$&nbsp;</span>390</div>
+      <span class="note">Preço de lançamento · Parcelado em até 4x no cartão</span>
     </div>
-    <div class="hero-cta-wrap hero-line">
-      <a href="#pricing" class="btn btn-pulse">Garantir minha vaga agora</a>
-      <span class="security-note">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+    <div class="hero-acts">
+      <a href="#pricing" class="btn pulse">Garantir minha vaga agora</a>
+      <span class="lock">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         Pagamento 100% seguro · 7 dias de garantia
       </span>
     </div>
   </div>
 </div>
 
-<!-- STATS BAR -->
+<!-- STATS -->
 <div class="stats-bar">
-  <div class="container stagger">
-    <div class="stat-item">
-      <h3 data-count="200" data-prefix="+">+200</h3>
-      <p>Alunos formados</p>
-    </div>
-    <div class="stat-item">
-      <h3 data-count="8" data-suffix="h+">8h+</h3>
-      <p>De conteúdo prático</p>
-    </div>
-    <div class="stat-item">
-      <h3 data-count="100" data-suffix="%">100%</h3>
-      <p>Online e flexível</p>
-    </div>
+  <div class="container">
+    <div class="stat" data-anim="up" data-d="1"><h3 data-count="10">10</h3><p>Vagas por turma</p></div>
+    <div class="stat" data-anim="up" data-d="2"><h3 data-count="30" data-suffix="h">30h</h3><p>Carga horária</p></div>
+    <div class="stat" data-anim="up" data-d="3"><h3 data-count="5">5</h3><p>Aulas presenciais</p></div>
   </div>
 </div>
 
-<!-- O QUE VOCÊ VAI APRENDER -->
+<!-- APRENDER -->
 <section>
   <div class="container">
-    <div class="section-header reveal">
+    <div class="s-hd" data-anim="up">
       <div class="tag">Conteúdo</div>
       <h2>O que você vai aprender</h2>
-      <p>Um currículo direto ao ponto, focado em resultados reais para o seu negócio.</p>
+      <p>Conteúdo prático e aplicável para transformar seu negócio com Inteligência Artificial.</p>
     </div>
-    <div class="learn-grid stagger">
-      <div class="learn-item">
-        <div class="learn-num">1</div>
-        <div>
-          <h4>Fundamentos de IA para Negócios</h4>
-          <p>Entenda como a IA funciona e onde ela pode transformar sua empresa.</p>
-        </div>
-      </div>
-      <div class="learn-item">
-        <div class="learn-num">2</div>
-        <div>
-          <h4>Ferramentas de IA na Prática</h4>
-          <p>ChatGPT, Copilot, Gemini e outras — aprenda a usar cada uma com eficiência.</p>
-        </div>
-      </div>
-      <div class="learn-item">
-        <div class="learn-num">3</div>
-        <div>
-          <h4>Automação de Processos</h4>
-          <p>Elimine tarefas repetitivas e libere tempo para o que realmente importa.</p>
-        </div>
-      </div>
-      <div class="learn-item">
-        <div class="learn-num">4</div>
-        <div>
-          <h4>IA no Marketing e Vendas</h4>
-          <p>Crie conteúdo, gere leads e converta mais usando inteligência artificial.</p>
-        </div>
-      </div>
-      <div class="learn-item">
-        <div class="learn-num">5</div>
-        <div>
-          <h4>Tomada de Decisão com Dados</h4>
-          <p>Use IA para analisar dados e tomar decisões mais rápidas e certeiras.</p>
-        </div>
-      </div>
-      <div class="learn-item">
-        <div class="learn-num">6</div>
-        <div>
-          <h4>Implementação no Seu Negócio</h4>
-          <p>Um plano passo a passo para aplicar tudo que aprendeu na sua realidade.</p>
-        </div>
-      </div>
+    <div class="learn-grid">
+      <div class="learn-card glass tilt" data-anim="left" data-d="1"><div class="num">01</div><div><h4>Jornada da I.A</h4><p>Domine as ferramentas de IA para criação de conteúdo, automação, análise de dados e produtividade.</p></div></div>
+      <div class="learn-card glass tilt" data-anim="right" data-d="1"><div class="num">02</div><div><h4>Agentes de I.A</h4><p>Automatize tarefas repetitivas e conecte seu assistente ao WhatsApp para responder clientes 24/7.</p></div></div>
+      <div class="learn-card glass tilt" data-anim="left" data-d="2"><div class="num">03</div><div><h4>Analista de Vendas</h4><p>Use IA para analisar métricas, identificar padrões de conversão e transformar dados em decisões estratégicas.</p></div></div>
+      <div class="learn-card glass tilt" data-anim="right" data-d="2"><div class="num">04</div><div><h4>Analista Financeiro</h4><p>IA que lê Notas Fiscais, organiza dados e entrega um dashboard gerencial atualizado em tempo real.</p></div></div>
+      <div class="learn-card glass tilt" data-anim="left" data-d="3"><div class="num">05</div><div><h4>Analista de Crédito</h4><p>Crie um sistema que realiza análise de crédito automatizada, avaliando perfis, históricos e riscos.</p></div></div>
     </div>
   </div>
 </section>
 
 <!-- VIDEO -->
-<section class="video-section">
+<section style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
   <div class="container">
-    <div class="section-header reveal">
+    <div class="s-hd" data-anim="up">
       <div class="tag">Apresentação</div>
       <h2>Veja como funciona o treinamento</h2>
     </div>
-    <div class="video-wrap reveal">
-      <div class="video-placeholder">
-        <div class="play-btn">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"></polygon></svg>
-        </div>
-        <p style="font-size:14px;">Vídeo de apresentação do curso</p>
+    <div class="video-wrap glass" id="video-wrap" data-anim="zoom">
+      <video id="course-video" preload="metadata" playsinline controlsList="nodownload" poster="assets/olivan.jpg">
+        <source src="assets/ia-financeiro.mp4" type="video/mp4">
+      </video>
+      <div class="video-overlay" id="video-overlay">
+        <div class="play-btn"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"></polygon></svg></div>
+        <p class="video-caption">Veja a IA Financeira em ação</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- POR QUE FAZER ISSO -->
+<!-- POR QUE -->
 <section>
   <div class="container">
-    <div class="section-header reveal">
+    <div class="s-hd" data-anim="up">
       <div class="tag">Por que agora?</div>
-      <h2>Quem não aprender IA vai ficar para trás</h2>
-      <p>O mercado já está mudando. Este treinamento te coloca à frente.</p>
+      <h2>Por que fazer este curso?</h2>
+      <p>Aprenda IA na prática, aplique em projetos reais e transforme sua carreira!</p>
     </div>
-    <div class="why-grid stagger">
-      <div class="why-card">
-        <div class="why-icon">⚡</div>
-        <h4>Produtividade 10x maior</h4>
-        <p>Faça em minutos o que antes levava horas, usando as ferramentas certas.</p>
-      </div>
-      <div class="why-card">
-        <div class="why-icon">🎯</div>
-        <h4>Vantagem competitiva real</h4>
-        <p>Enquanto seu concorrente ainda aprende, você já aplica e gera resultados.</p>
-      </div>
-      <div class="why-card">
-        <div class="why-icon">📈</div>
-        <h4>Mais lucro, menos custo</h4>
-        <p>Automatize processos e reduza custos operacionais sem perder qualidade.</p>
-      </div>
-      <div class="why-card">
-        <div class="why-icon">🧠</div>
-        <h4>Sem precisar saber programar</h4>
-        <p>Conteúdo 100% acessível para empreendedores e gestores de qualquer área.</p>
-      </div>
+    <div class="why-grid">
+      <div class="why-card glass tilt" data-anim="left" data-d="1"><div class="w-icon">🚀</div><h4>Turbine sua Carreira com IA</h4><p>Empresas estão promovendo profissionais que dominam IA. Adquira essas competências agora.</p></div>
+      <div class="why-card glass tilt" data-anim="right" data-d="1"><div class="w-icon">🤝</div><h4>100% Presencial</h4><p>Interação direta com o facilitador e networking entre participantes em Getúlio Vargas, RS.</p></div>
+      <div class="why-card glass tilt" data-anim="left" data-d="2"><div class="w-icon">📊</div><h4>Cases Reais</h4><p>Aprenda com automações empresariais que já geraram resultados mensuráveis.</p></div>
+      <div class="why-card glass tilt" data-anim="right" data-d="2"><div class="w-icon">🎯</div><h4>Projetos Práticos</h4><p>Desenvolva projetos aplicáveis ao seu dia a dia, do atendimento ao pós-venda.</p></div>
     </div>
   </div>
 </section>
 
-<!-- DETALHES DO CURSO -->
-<section style="background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+<!-- DETALHES -->
+<section style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
   <div class="container">
-    <div class="section-header reveal">
+    <div class="s-hd" data-anim="up">
       <div class="tag">Detalhes do Curso</div>
       <h2>O que está incluído</h2>
     </div>
-    <div class="details-grid stagger" style="max-width: 520px; margin: 0 auto;">
-      <div class="detail-card">
-        <div class="val">6</div>
-        <div class="lbl">Módulos completos</div>
-      </div>
-      <div class="detail-card">
-        <div class="val">8h+</div>
-        <div class="lbl">Horas de conteúdo</div>
-      </div>
-      <div class="detail-card">
-        <div class="val">100%</div>
-        <div class="lbl">Online e no seu ritmo</div>
-      </div>
-      <div class="detail-card">
-        <div class="val">∞</div>
-        <div class="lbl">Acesso vitalício</div>
-      </div>
+    <div class="det-grid">
+      <div class="det-card glass tilt" data-anim="up" data-d="1"><div class="val">5</div><div class="lbl">Aulas presenciais</div></div>
+      <div class="det-card glass tilt" data-anim="up" data-d="2"><div class="val">30h</div><div class="lbl">Carga horária total</div></div>
+      <div class="det-card glass tilt" data-anim="up" data-d="3"><div class="val">10</div><div class="lbl">Vagas por turma</div></div>
+      <div class="det-card glass tilt" data-anim="up" data-d="4"><div class="val">4x</div><div class="lbl">No cartão de crédito</div></div>
     </div>
   </div>
 </section>
@@ -700,206 +620,509 @@
 <!-- PRICING -->
 <section id="pricing">
   <div class="container">
-    <div class="section-header reveal">
+    <div class="s-hd" data-anim="up">
       <div class="tag">Investimento</div>
       <h2>Garanta seu acesso</h2>
       <p>Oferta por tempo limitado. O preço volta ao normal em breve.</p>
     </div>
-    <div class="pricing-card reveal">
-      <div class="pricing-badge">Oferta especial</div>
-      <h3>Treinamento IA na Prática</h3>
-      <p class="sub">Acesso completo a todo o conteúdo</p>
-      <div class="price-old">De R$ 499,00</div>
-      <div class="price-main"><span>R$&nbsp;</span>309</div>
-      <div class="price-note">ou 12x de R$ 30,09 no cartão</div>
-      <a href="https://wa.me/555492189652?text=Olá%2C%20quero%20me%20inscrever%20no%20curso%20IA%20na%20Prática!" class="btn" target="_blank" rel="noopener">Quero me inscrever agora</a>
-      <div class="security-note" style="justify-content: center;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        Pagamento seguro · 7 dias de garantia incondicional
+    <div class="p-wrap" data-anim="zoom">
+      <div class="p-card glass2">
+        <div class="p-badge">🔥 Preço de Lançamento</div>
+        <h3>IA Business</h3>
+        <p class="sub">Treinamento presencial · Getúlio Vargas, RS</p>
+        <div class="old">De R$ 540,00</div>
+        <div class="main"><span>R$&nbsp;</span>390</div>
+        <div class="note">Parcelado em até 4x no cartão · Valor promocional para as primeiras turmas</div>
+        <a href="#form" class="btn pulse">Quero me inscrever agora</a>
+        <div class="lock" style="justify-content:center;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          Pagamento seguro · 7 dias de garantia
+        </div>
+        <ul class="feats">
+          <li>5 aulas presenciais · 30 horas totais</li>
+          <li>Até 10 pessoas por turma</li>
+          <li>5 módulos com projetos práticos</li>
+          <li>Certificado de Conclusão 30h</li>
+          <li>Getúlio Vargas, RS</li>
+        </ul>
       </div>
-      <ul class="pricing-features">
-        <li>Acesso imediato após a compra</li>
-        <li>6 módulos com aulas práticas</li>
-        <li>Materiais e templates exclusivos</li>
-        <li>Acesso vitalício ao conteúdo</li>
-        <li>Certificado de conclusão</li>
-        <li>Suporte via comunidade exclusiva</li>
-      </ul>
     </div>
   </div>
 </section>
 
 <!-- FACILITADOR -->
-<section style="background: var(--bg2); border-top: 1px solid var(--border);">
+<section style="border-top:1px solid var(--border);">
   <div class="container">
-    <div class="section-header reveal">
+    <div class="s-hd" data-anim="up">
       <div class="tag">Seu facilitador</div>
       <h2>Quem vai te ensinar</h2>
     </div>
-    <div class="facilitator-card reveal">
-      <div class="facilitator-photo">👤</div>
-      <div class="facilitator-info">
-        <h3 style="" data-cc-id="cc-3">Olivan Greiner&nbsp;</h3>
-        <div class="facilitator-role">Especialista em IA aplicada a negócios</div>
-        <p>Com anos de experiência ajudando empresas a implementar inteligência artificial de forma estratégica, Olan desenvolveu uma metodologia prática e acessível para quem quer usar IA sem precisar saber programar.</p>
+    <div class="fac glass tilt" data-anim="up">
+      <div class="fac-photo"><img src="assets/olivan.jpg" alt="Olivan Greiner"></div>
+      <div class="fac-info">
+        <h3>Olivan Greiner</h3>
+        <div class="fac-role">Especialista em I.A e Automação · Professor Universitário</div>
+        <p>6 anos coordenando projetos práticos de IA. Experiência comprovada no ensino e desenvolvimento, com cases reais implementados e resultados mensuráveis. <em style="color:var(--accent);font-style:normal;">"Transforme teoria em prática."</em></p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- INSCRIÇÃO VIA WHATSAPP -->
+<!-- FORM -->
 <section id="form" style="border-top:1px solid var(--border);">
   <div class="container">
-    <div style="text-align:center; margin-bottom:40px;">
+    <div class="s-hd" data-anim="up">
       <div class="tag">Inscrição</div>
-      <h2 style="font-size:clamp(26px,4vw,42px); font-weight:800; margin-bottom:12px;">Conquiste sua vaga</h2>
-      <p style="color:var(--fg2); font-size:17px; max-width:500px; margin:0 auto;">Fale direto com a equipe pelo WhatsApp e receba todas as informações sobre datas e condições especiais.</p>
+      <h2>Conquiste sua vaga</h2>
+      <p>Fale direto com a equipe pelo WhatsApp e receba todas as informações sobre datas e condições especiais.</p>
     </div>
-    <div style="max-width:440px; margin:0 auto;">
-      <div class="inscricao-card reveal">
-        <div style="font-family:'Syne',sans-serif; font-size:20px; font-weight:700; margin-bottom:8px;">Atendimento direto e sem burocracia</div>
-        <p style="font-size:14px; color:var(--fg2); margin-bottom:28px;">Tire suas dúvidas, confirme datas e garanta sua vaga em poucos minutos.</p>
-        <a href="https://wa.me/555492189652?text=Olá%2C%20quero%20conquistar%20minha%20vaga%20no%20curso%20IA%20na%20Prática!" class="btn btn-pulse" target="_blank" rel="noopener" style="display:flex; align-items:center; justify-content:center; gap:10px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+    <div class="p-wrap" data-anim="zoom">
+      <div class="p-card glass2" style="padding:36px 32px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;">Atendimento direto e sem burocracia</div>
+        <p style="font-size:14px;color:var(--fg2);margin-bottom:24px;">Tire suas dúvidas, confirme datas e garanta sua vaga em poucos minutos.</p>
+        <a href="#" class="btn pulse wpp-link" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/></svg>
           Quero me inscrever via WhatsApp
         </a>
-        <p style="font-size:12px; color:var(--fg2); margin-top:18px;">Em breve novas datas — vagas limitadas!</p>
+        <p style="font-size:12px;color:var(--fg2);margin-top:18px;">Em breve novas datas — vagas limitadas!</p>
       </div>
     </div>
   </div>
 </section>
 
-<style>
-.inscricao-card {
-  background: rgba(138,103,255,0.07);
-  border: 1px solid rgba(138,103,255,0.25);
-  border-radius: 22px;
-  padding: 44px 36px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(16px);
-}
-.inscricao-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-}
-@media (max-width: 500px) {
-  .inscricao-card { padding: 28px 18px; }
-}
-</style>
-
-<!-- FINAL CTA -->
-<div class="final-cta">
+<!-- FINAL -->
+<div class="final">
   <div class="container">
-    <h2>Pronto para transformar seu negócio com IA?</h2>
-    <p>Mais de 200 alunos já estão aplicando. É a sua vez.</p>
-    <a href="#pricing" class="btn" style="display:block; max-width: 380px; margin: 0 auto 14px;">Garantir minha vaga agora</a>
-    <div class="security-note">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+    <h2 data-anim="up">Vagas Limitadas — Até 10 por Turma</h2>
+    <p data-anim="up" data-d="1">Inscreva-se agora e receba via WhatsApp informações sobre datas, investimento e condições especiais!</p>
+    <a href="#form" class="btn pulse" data-anim="up" data-d="2" style="display:block;max-width:380px;margin:0 auto 16px;">Garantir minha vaga agora</a>
+    <div class="lock" data-anim="fade" data-d="3" style="justify-content:center;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
       7 dias de garantia · Sem burocracia
     </div>
   </div>
 </div>
 
-<!-- FOOTER -->
-<footer>
-  <p>© 2026 IA na Prática · Todos os direitos reservados</p>
-</footer>
+<footer><p>© 2026 IA Business · Getúlio Vargas, RS · Todos os direitos reservados</p></footer>
 
-<!-- BOTÃO FLUTUANTE WHATSAPP -->
-<a href="https://wa.me/555492189652?text=Olá%2C%20quero%20saber%20mais%20sobre%20o%20curso%20IA%20na%20Prática!"
-   class="whatsapp-float"
-   target="_blank"
-   rel="noopener"
-   aria-label="Falar no WhatsApp">
-  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="white">
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-  </svg>
-  <span>Falar no WhatsApp</span>
-</a>
-
-<style>
-.whatsapp-float {
-  position: fixed;
-  bottom: 28px;
-  right: 28px;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #25D366;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  padding: 14px 22px 14px 18px;
-  border-radius: 50px;
-  text-decoration: none;
-  box-shadow: 0 4px 24px rgba(37,211,102,0.45);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.whatsapp-float:hover {
-  transform: translateY(-3px) scale(1.04);
-  box-shadow: 0 8px 32px rgba(37,211,102,0.55);
-}
-@media (max-width: 500px) {
-  .whatsapp-float span { display: none; }
-  .whatsapp-float { padding: 16px; border-radius: 50%; }
-}
-</style>
+</div><!-- /#page -->
 
 <script>
-// ---- SCROLL REVEAL ----
-const revealEls = document.querySelectorAll('.reveal, .stagger');
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      if (entry.target.classList.contains('stagger')) {
-        animateCounters(entry.target);
-      }
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.15 });
-revealEls.forEach(el => observer.observe(el));
+/* =============================================
+   3D NETWORK BACKGROUND
+   ============================================= */
+const bgC  = document.getElementById('bg-canvas');
+const bgX  = bgC.getContext('2d');
+let BW, BH;
 
-// ---- COUNTER ANIMATION ----
-function animateCounters(parent) {
-  const counters = parent.querySelectorAll('[data-count]');
-  counters.forEach(el => {
-    const target = parseInt(el.dataset.count);
-    const prefix = el.dataset.prefix || '';
-    const suffix = el.dataset.suffix || '';
-    const duration = 1200;
-    const start = performance.now();
-    function step(now) {
-      const progress = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      el.textContent = prefix + Math.round(eased * target) + suffix;
-      if (progress < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  });
+function resizeBg() {
+  BW = bgC.width  = window.innerWidth;
+  BH = bgC.height = window.innerHeight;
+}
+resizeBg();
+window.addEventListener('resize', resizeBg);
+
+const N = 72;
+const FOCAL = 520;
+let rotX = 0, rotY = 0, bgScrollY = 0, mX = 0, mY = 0, bgT = 0;
+
+const nodes = Array.from({ length: N }, () => ({
+  x: (Math.random() - .5) * 1400,
+  y: (Math.random() - .5) * 900,
+  z: (Math.random() - .5) * 700,
+  vx: (Math.random() - .5) * .28,
+  vy: (Math.random() - .5) * .28,
+  vz: (Math.random() - .5) * .18,
+  r:  Math.random() * 2.2 + 1,
+  ph: Math.random() * Math.PI * 2,
+}));
+
+// edges
+const edges = [];
+for (let i = 0; i < N; i++) {
+  for (let j = i + 1; j < N; j++) {
+    const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y, dz = nodes[i].z - nodes[j].z;
+    const d = Math.sqrt(dx*dx + dy*dy + dz*dz);
+    if (d < 300) edges.push([i, j, d]);
+  }
 }
 
-// ---- PARALLAX ORBS ----
-window.addEventListener('mousemove', (e) => {
-  const x = (e.clientX / window.innerWidth - 0.5) * 30;
-  const y = (e.clientY / window.innerHeight - 0.5) * 20;
-  const orb1 = document.querySelector('.hero-orb-1');
-  const orb2 = document.querySelector('.hero-orb-2');
-  if (orb1) orb1.style.transform = `translate(${x * 0.8}px, ${y * 0.8}px)`;
-  if (orb2) orb2.style.transform = `translate(${-x * 0.6}px, ${-y * 0.6}px)`;
+// packets
+const pkts = edges
+  .filter(() => Math.random() < 0.22)
+  .map(e => ({ e, t: Math.random(), sp: .003 + Math.random() * .004 }));
+
+function project(x, y, z) {
+  const cy = Math.cos(rotY), sy = Math.sin(rotY);
+  const x1 = x*cy + z*sy, z1 = -x*sy + z*cy;
+  const cx = Math.cos(rotX), sx = Math.sin(rotX);
+  const y1 = y*cx - z1*sx, z2 = y*sx + z1*cx;
+  const sc = FOCAL / (FOCAL + z2);
+  return { sx: x1*sc + BW/2, sy: y1*sc + BH/2 + bgScrollY*0.1, sc, z: z2 };
+}
+
+function drawBg() {
+  bgX.clearRect(0, 0, BW, BH);
+  bgT += .006;
+
+  // smooth mouse rotation
+  const tRY = (mX/BW - .5) * .55;
+  const tRX = (mY/BH - .5) * -.3;
+  rotY += (tRY - rotY) * .018 + .0007;
+  rotX += (tRX - rotX) * .018;
+
+  // move nodes
+  nodes.forEach(n => {
+    n.x += n.vx; n.y += n.vy; n.z += n.vz;
+    if (Math.abs(n.x) > 700) n.vx *= -1;
+    if (Math.abs(n.y) > 450) n.vy *= -1;
+    if (Math.abs(n.z) > 350) n.vz *= -1;
+  });
+
+  const P = nodes.map(n => project(n.x, n.y, n.z));
+
+  // edges
+  edges.forEach(([a, b, d]) => {
+    const pa = P[a], pb = P[b];
+    const az = (pa.z + pb.z) / 2;
+    const da = Math.max(0, 1 - (az + 350) / 700) * (1 - d/300) * 0.32;
+    if (da < .01) return;
+    bgX.beginPath();
+    bgX.moveTo(pa.sx, pa.sy);
+    bgX.lineTo(pb.sx, pb.sy);
+    bgX.strokeStyle = `rgba(80,210,120,${da})`;
+    bgX.lineWidth = .85;
+    bgX.stroke();
+  });
+
+  // packets
+  pkts.forEach(pkt => {
+    pkt.t = (pkt.t + pkt.sp) % 1;
+    const [a, b] = pkt.e;
+    const pa = P[a], pb = P[b];
+    const px = pa.sx + (pb.sx - pa.sx) * pkt.t;
+    const py = pa.sy + (pb.sy - pa.sy) * pkt.t;
+    const az = (pa.z + pb.z) / 2;
+    const al = Math.max(0, 1 - (az + 350) / 700);
+    if (al < .05) return;
+    const g = bgX.createRadialGradient(px, py, 0, px, py, 7);
+    g.addColorStop(0, `rgba(140,255,170,${al*.9})`);
+    g.addColorStop(1, 'rgba(140,255,170,0)');
+    bgX.beginPath(); bgX.arc(px, py, 3.5, 0, Math.PI*2);
+    bgX.fillStyle = g; bgX.fill();
+  });
+
+  // nodes
+  nodes.forEach((n, i) => {
+    const p = P[i];
+    const da = Math.max(0, 1 - (p.z + 350) / 700);
+    if (da < .04) return;
+    const pulse = .5 + .5 * Math.sin(bgT*2 + n.ph);
+    const r = n.r * p.sc * (.8 + .4*pulse);
+    if (r <= 0) return;
+
+    // glow
+    const g = bgX.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r*5);
+    g.addColorStop(0, `rgba(80,220,120,${da*.25*pulse})`);
+    g.addColorStop(1, 'rgba(80,220,120,0)');
+    bgX.beginPath(); bgX.arc(p.sx, p.sy, r*5, 0, Math.PI*2);
+    bgX.fillStyle = g; bgX.fill();
+
+    // core
+    bgX.beginPath(); bgX.arc(p.sx, p.sy, Math.max(r,.5), 0, Math.PI*2);
+    bgX.fillStyle = `rgba(110,245,145,${da*(.5+.5*pulse)})`;
+    bgX.fill();
+  });
+
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+window.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; }, { passive: true });
+window.addEventListener('scroll',    () => { bgScrollY = window.scrollY; }, { passive: true });
+
+/* =============================================
+   INTRO
+   ============================================= */
+/* =============================================
+   INTRO — ORB CONNECTION
+   ============================================= */
+(function() {
+  const introBg = document.getElementById('intro-bg');
+  const orbWrap = document.getElementById('orb-wrap');
+  const orbCore = document.getElementById('orb-core');
+  const hint    = document.getElementById('intro-hint');
+  const success = document.getElementById('intro-success');
+  const ibx     = introBg.getContext('2d');
+
+  // BG canvas
+  function resizeIBg() {
+    introBg.width  = window.innerWidth;
+    introBg.height = window.innerHeight;
+  }
+  resizeIBg();
+  window.addEventListener('resize', resizeIBg);
+
+  // Subtle background node network for intro
+  const bgNodes = Array.from({length:40},()=>({
+    x:(Math.random()-0.5)*1200, y:(Math.random()-0.5)*700, z:(Math.random()-0.5)*400,
+    vx:(Math.random()-0.5)*0.22, vy:(Math.random()-0.5)*0.22,
+    r:Math.random()*1.8+0.8, ph:Math.random()*Math.PI*2
+  }));
+  const bgEdges=[];
+  for(let i=0;i<bgNodes.length;i++) for(let j=i+1;j<bgNodes.length;j++){
+    const d=Math.hypot(bgNodes[i].x-bgNodes[j].x,bgNodes[i].y-bgNodes[j].y);
+    if(d<280) bgEdges.push([i,j,d]);
+  }
+  let iRotY=0, iT=0;
+  function drawIBg(){
+    if(!introBg.isConnected) return;
+    const W=introBg.width, H=introBg.height;
+    ibx.clearRect(0,0,W,H); iT+=0.006; iRotY+=0.0006;
+    bgNodes.forEach(n=>{n.x+=n.vx;n.y+=n.vy;if(Math.abs(n.x)>600)n.vx*=-1;if(Math.abs(n.y)>350)n.vy*=-1;});
+    const proj=bgNodes.map(n=>{
+      const cy=Math.cos(iRotY),sy=Math.sin(iRotY);
+      const x1=n.x*cy+n.z*sy,z1=-n.x*sy+n.z*cy;
+      const sc=420/(420+z1);
+      return{sx:x1*sc+W/2,sy:n.y*sc+H/2,sc,z:z1};
+    });
+    bgEdges.forEach(([a,b,d])=>{
+      const pa=proj[a],pb=proj[b];
+      const al=Math.max(0,(1-(pa.z+400)/800))*(1-d/280)*0.18;
+      if(al<0.01)return;
+      ibx.beginPath();ibx.moveTo(pa.sx,pa.sy);ibx.lineTo(pb.sx,pb.sy);
+      ibx.strokeStyle=`rgba(80,210,120,${al})`;ibx.lineWidth=0.7;ibx.stroke();
+    });
+    bgNodes.forEach((n,i)=>{
+      const p=proj[i]; const da=Math.max(0,1-(p.z+400)/800);
+      if(da<0.04)return;
+      const pulse=0.5+0.5*Math.sin(iT*2+n.ph);
+      const r=Math.max(0.1, n.r*p.sc*(0.8+0.4*pulse));
+      const g=ibx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,r*4);
+      g.addColorStop(0,`rgba(80,220,120,${da*0.18*pulse})`);g.addColorStop(1,'rgba(80,220,120,0)');
+      ibx.beginPath();ibx.arc(p.sx,p.sy,r*4,0,Math.PI*2);ibx.fillStyle=g;ibx.fill();
+      ibx.beginPath();ibx.arc(p.sx,p.sy,r,0,Math.PI*2);
+      ibx.fillStyle=`rgba(100,240,140,${da*(0.4+0.6*pulse)})`;ibx.fill();
+    });
+    requestAnimationFrame(drawIBg);
+  }
+  drawIBg();
+
+  // ORB interaction — hold/press to "connect"
+  let holding = false;
+  let holdTimer = null;
+  let progress = 0;
+  let progressAnim = null;
+  let completed = false;
+
+  // Progress ring drawn over orb
+  const ringCanvas = document.createElement('canvas');
+  const size = orbWrap.offsetWidth || 220;
+  ringCanvas.width  = size;
+  ringCanvas.height = size;
+  ringCanvas.style.cssText = `position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;`;
+  orbWrap.appendChild(ringCanvas);
+  const rcx = ringCanvas.getContext('2d');
+
+  function drawRing(p) {
+    rcx.clearRect(0, 0, size, size);
+    if (p <= 0) return;
+    const cx = size/2, cy = size/2, r = size/2 - 4;
+    rcx.beginPath();
+    rcx.arc(cx, cy, r, -Math.PI/2, -Math.PI/2 + Math.PI*2*p);
+    rcx.strokeStyle = `rgba(110,245,150,${0.5 + p*0.5})`;
+    rcx.lineWidth = 3;
+    rcx.lineCap = 'round';
+    rcx.shadowColor = 'rgba(80,210,120,0.8)';
+    rcx.shadowBlur = 10;
+    rcx.stroke();
+    rcx.shadowBlur = 0;
+  }
+
+  function startHold() {
+    if (completed) return;
+    holding = true;
+    orbWrap.classList.add('touching');
+    hint.style.opacity = '0';
+
+    const duration = 900; // ms to fill ring
+    const start = performance.now();
+
+    function animate(now) {
+      if (!holding) {
+        // Release — drain
+        drainProgress();
+        return;
+      }
+      progress = Math.min((now - start) / duration, 1);
+      drawRing(progress);
+      if (progress < 1) {
+        progressAnim = requestAnimationFrame(animate);
+      } else {
+        completeIntro();
+      }
+    }
+    cancelAnimationFrame(progressAnim);
+    progressAnim = requestAnimationFrame(animate);
+  }
+
+  function endHold() {
+    if (completed) return;
+    holding = false;
+    orbWrap.classList.remove('touching');
+    if (progress < 1) drainProgress();
+  }
+
+  function drainProgress() {
+    cancelAnimationFrame(progressAnim);
+    const startP = progress;
+    const start  = performance.now();
+    function drain(now) {
+      progress = Math.max(startP - (now - start) / 400, 0);
+      drawRing(progress);
+      if (progress > 0) progressAnim = requestAnimationFrame(drain);
+      else { progress = 0; drawRing(0); }
+    }
+    progressAnim = requestAnimationFrame(drain);
+  }
+
+  function completeIntro() {
+    if (completed) return;
+    completed = true;
+    drawRing(1);
+    spawnParticles();
+    setTimeout(() => {
+      success.classList.add('show');
+    }, 200);
+    setTimeout(() => {
+      document.getElementById('intro').classList.add('done');
+      document.getElementById('nav').classList.add('show');
+    }, 1800);
+  }
+
+  // Events — mouse + touch
+  orbWrap.addEventListener('mousedown',  startHold);
+  orbWrap.addEventListener('touchstart', e => { e.preventDefault(); startHold(); }, {passive:false});
+  window.addEventListener('mouseup',   endHold);
+  window.addEventListener('touchend',  endHold);
+  orbWrap.addEventListener('mouseleave', () => { if (!completed) endHold(); });
+
+  function spawnParticles() {
+    const pc = document.createElement('canvas');
+    pc.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:10000;pointer-events:none;';
+    document.body.appendChild(pc);
+    pc.width = window.innerWidth; pc.height = window.innerHeight;
+    const pcx = pc.getContext('2d');
+    const cx = pc.width/2, cy = pc.height/2;
+    const parts = Array.from({length:70}, () => ({
+      x:cx, y:cy,
+      vx:(Math.random()-0.5)*14,
+      vy:(Math.random()-0.5)*14 - 2,
+      r:Math.random()*4+1.5,
+      life:1,
+      color:`hsl(${128+Math.random()*40},90%,${55+Math.random()*20}%)`
+    }));
+    function drawParts() {
+      pcx.clearRect(0,0,pc.width,pc.height);
+      let alive = false;
+      parts.forEach(p => {
+        p.x+=p.vx; p.y+=p.vy; p.vy+=0.3; p.life-=0.022;
+        if(p.life<=0) return; alive=true;
+        pcx.globalAlpha = p.life;
+        pcx.beginPath(); pcx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        pcx.fillStyle = p.color; pcx.fill();
+      });
+      pcx.globalAlpha=1;
+      if(alive) requestAnimationFrame(drawParts);
+      else pc.remove();
+    }
+    drawParts();
+  }
+})();
+
+/* =============================================
+   SCROLL REVEAL + COUNTERS
+   ============================================= */
+const rObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('in');
+    e.target.querySelectorAll('[data-count]').forEach(countUp);
+    rObs.unobserve(e.target);
+  });
+}, { threshold: .12 });
+document.querySelectorAll('[data-anim]').forEach(el => rObs.observe(el));
+
+function countUp(el) {
+  const target = parseInt(el.dataset.count);
+  const pre = el.dataset.prefix || '', suf = el.dataset.suffix || '';
+  const t0 = performance.now();
+  (function step(now) {
+    const t = Math.min((now-t0)/1400, 1);
+    el.textContent = pre + Math.round((1-Math.pow(1-t,3))*target) + suf;
+    if (t < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
+/* =============================================
+   3D TILT
+   ============================================= */
+document.querySelectorAll('.tilt').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const dx = (e.clientX - r.left - r.width/2)  / (r.width/2);
+    const dy = (e.clientY - r.top  - r.height/2) / (r.height/2);
+    card.style.transform = `perspective(600px) rotateY(${dx*9}deg) rotateX(${-dy*6}deg) translateZ(10px)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(600px) rotateY(0) rotateX(0) translateZ(0)';
+  });
 });
 
-// ---- NAV SCROLL SHADOW ----
-const nav = document.querySelector('nav');
-window.addEventListener('scroll', () => {
-  nav.style.boxShadow = window.scrollY > 40 ? '0 4px 32px rgba(0,0,0,0.4)' : 'none';
-}, { passive: true });
-</script>
+/* NAV */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), { passive: true });
 
-</body></html>
+/* =============================================
+   WHATSAPP LINK — edite o número e a mensagem aqui
+   ============================================= */
+const WHATSAPP_PHONE = '5554999999999'; // ⚠️ Substitua pelo número real (DDI 55 + DDD + número, só dígitos)
+const WHATSAPP_MESSAGE = 'Olá Olivan! Tenho interesse em garantir minha vaga no treinamento IA Business em Getúlio Vargas. Pode me passar mais informações sobre datas e pagamento?';
+
+(function(){
+  const link = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+  document.querySelectorAll('.wpp-link').forEach(a => a.href = link);
+})();
+
+/* VIDEO PLAYER */
+(function(){
+  const wrap    = document.getElementById('video-wrap');
+  const video   = document.getElementById('course-video');
+  const overlay = document.getElementById('video-overlay');
+  if(!wrap || !video) return;
+
+  wrap.addEventListener('click', () => {
+    if(video.paused){
+      video.play();
+      wrap.classList.add('playing');
+      video.setAttribute('controls','');
+    } else {
+      video.pause();
+      wrap.classList.remove('playing');
+    }
+  });
+  video.addEventListener('pause', () => {
+    if(video.ended || !video.currentTime){
+      wrap.classList.remove('playing');
+      video.removeAttribute('controls');
+    }
+  });
+  video.addEventListener('ended', () => {
+    wrap.classList.remove('playing');
+    video.removeAttribute('controls');
+    video.currentTime = 0;
+  });
+})();
+</script>
+</body>
+</html>
