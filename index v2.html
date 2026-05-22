@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA Business — Inteligência Artificial Aplicada a Negócios · Getúlio Vargas, RS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #050906;
+  --bg2:     rgba(8,16,10,0.85);
+  --bg3:     rgba(14,24,16,0.9);
+  --border:  rgba(80,200,120,0.12);
+  --accent:  oklch(66% 0.21 148);
+  --accent2: oklch(68% 0.18 172);
+  --fg:      #edf5f0;
+  --fg2:     #7da896;
+  --r:       14px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+h1,h2,h3,h4 { font-family: 'Syne', sans-serif; line-height: 1.15; }
+
+/* 3D CANVAS */
+#bg-canvas {
+  position: fixed; inset: 0; z-index: 0;
+  width: 100%; height: 100%; pointer-events: none;
+}
+#page { position: relative; z-index: 1; }
+
+/* INTRO */
+#intro {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+  transition: opacity 1s ease, visibility 1s ease;
+}
+#intro.done { opacity: 0; visibility: hidden; pointer-events: none; }
+
+#intro-bg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+#intro-ui {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 32px;
+}
+
+#intro-flow { display: block; cursor: crosshair; }
+
+.intro-hint {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; color: var(--fg2);
+  letter-spacing: 0.06em;
+  animation: hintPulse 2s ease-in-out infinite;
+  transition: opacity 0.4s;
+}
+.intro-hint .hint-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent); font-size: 13px;
+  animation: hintPulse 2s ease-in-out infinite;
+}
+@keyframes hintPulse {
+  0%,100% { opacity: 0.6; transform: translateY(0); }
+  50%      { opacity: 1;   transform: translateY(-3px); }
+}
+
+.intro-success {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  opacity: 0; pointer-events: none; transition: opacity 0.4s;
+}
+.intro-success.show { opacity: 1; }
+.success-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; color: #000; font-weight: 700;
+  animation: successPop 0.5s cubic-bezier(.22,1,.36,1);
+}
+@keyframes successPop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.success-text {
+  font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700;
+  color: var(--accent); letter-spacing: -0.01em;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
+  background: rgba(5,9,6,0.7); backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%);
+  transition: transform 0.7s cubic-bezier(.22,1,.36,1), box-shadow 0.3s;
+}
+nav.show { transform: translateY(0); }
+nav.scrolled { box-shadow: 0 4px 40px rgba(0,0,0,0.6); }
+.nav-logo {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.nav-cta {
+  background: var(--accent); color: #000;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+  padding: 9px 22px; border-radius: 100px; text-decoration: none;
+  transition: filter 0.2s, transform 0.15s;
+}
+.nav-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+/* UTILITY */
+.container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+.tag {
+  display: inline-block;
+  background: oklch(66% 0.21 148 / 0.1);
+  border: 1px solid oklch(66% 0.21 148 / 0.3);
+  color: var(--accent); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 100px; margin-bottom: 16px;
+}
+.btn {
+  display: block; width: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #000; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px;
+  padding: 18px 40px; border-radius: 100px;
+  text-decoration: none; text-align: center; border: none; cursor: pointer;
+  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.btn:hover { filter: brightness(1.1); transform: translateY(-3px); box-shadow: 0 16px 40px oklch(66% 0.21 148 / 0.35); }
+.pulse { animation: pulse 2.4s ease-out infinite; }
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0    oklch(66% 0.21 148 / 0.55); }
+  70%  { box-shadow: 0 0 0 18px oklch(66% 0.21 148 / 0); }
+  100% { box-shadow: 0 0 0 0    oklch(66% 0.21 148 / 0); }
+}
+.lock { font-size: 12px; color: var(--fg2); display: flex; align-items: center; gap: 6px; }
+.glass  { background: rgba(8,16,10,0.75); border: 1px solid var(--border); backdrop-filter: blur(16px); }
+.glass2 { background: rgba(12,22,14,0.9);  border: 1px solid rgba(80,200,120,0.2); backdrop-filter: blur(20px); }
+
+/* SCROLL ANIM */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(22px); }
+  to   { opacity:1; transform:none; }
+}
+[data-anim] {
+  opacity: 0;
+  transition: opacity 0.85s cubic-bezier(.22,1,.36,1), transform 0.85s cubic-bezier(.22,1,.36,1);
+}
+[data-anim="up"]   { transform: translateY(50px) rotateX(6deg); }
+[data-anim="left"] { transform: translateX(-60px) rotateY(-6deg); }
+[data-anim="right"]{ transform: translateX(60px)  rotateY(6deg); }
+[data-anim="zoom"] { transform: scale(0.88) translateY(20px); }
+[data-anim="fade"] { transform: none; }
+[data-anim].in { opacity: 1 !important; transform: none !important; }
+[data-d="1"] { transition-delay:.08s; } [data-d="2"] { transition-delay:.16s; }
+[data-d="3"] { transition-delay:.24s; } [data-d="4"] { transition-delay:.32s; }
+[data-d="5"] { transition-delay:.40s; } [data-d="6"] { transition-delay:.48s; }
+
+/* TILT */
+.tilt { transform-style: preserve-3d; will-change: transform; transition: transform 0.12s ease, box-shadow 0.2s; }
+.tilt:hover { box-shadow: 0 20px 60px oklch(66% 0.21 148 / 0.15); }
+
+/* HERO */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 130px 24px 90px;
+}
+.hero-content { max-width: 740px; }
+.hero h1 {
+  font-size: clamp(36px,6.5vw,68px); font-weight: 800;
+  letter-spacing: -0.025em; margin-bottom: 24px; text-wrap: pretty;
+  opacity: 0; animation: fadeUp 0.8s 0.3s cubic-bezier(.22,1,.36,1) forwards;
+}
+.accent-text {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-style: normal;
+}
+.hero p {
+  font-size: clamp(16px,2.2vw,19px); color: var(--fg2);
+  max-width: 540px; margin: 0 auto 44px; text-wrap: pretty;
+  opacity: 0; animation: fadeUp 0.8s 0.5s cubic-bezier(.22,1,.36,1) forwards;
+}
+.price-pill {
+  display: inline-flex; flex-direction: column; align-items: center;
+  border-radius: 20px; padding: 22px 44px 24px; margin-bottom: 30px;
+  opacity: 0; animation: fadeUp 0.8s 0.65s cubic-bezier(.22,1,.36,1) forwards;
+}
+.price-pill .old  { font-size:13px; color:var(--fg2); text-decoration:line-through; }
+.price-pill .main { font-family:'Syne',sans-serif; font-size:48px; font-weight:800; line-height:1; margin:6px 0; }
+.price-pill .main span { font-size:20px; font-weight:500; color:var(--fg2); }
+.price-pill .note { font-size:12px; color:var(--fg2); }
+.hero-acts {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  opacity: 0; animation: fadeUp 0.8s 0.8s cubic-bezier(.22,1,.36,1) forwards;
+}
+.hero-acts .btn { max-width: 360px; }
+
+/* STATS */
+.stats-bar {
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  padding:32px 24px; background:rgba(5,9,6,0.6); backdrop-filter:blur(16px);
+}
+.stats-bar .container { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; text-align:center; }
+.stat h3 {
+  font-size:clamp(24px,4vw,36px); font-weight:800;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.stat p { font-size:13px; color:var(--fg2); margin-top:4px; }
+
+/* SECTION */
+section { padding:80px 24px; }
+.s-hd { text-align:center; margin-bottom:52px; }
+.s-hd h2 { font-size:clamp(26px,4vw,42px); font-weight:800; margin-bottom:12px; }
+.s-hd p  { color:var(--fg2); font-size:17px; max-width:500px; margin:0 auto; }
+
+/* LEARN */
+.learn-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(275px,1fr)); gap:16px; perspective:800px; }
+.learn-card { border-radius:var(--r); padding:24px; display:flex; gap:16px; align-items:flex-start; cursor:default; }
+.num { font-family:'Syne',sans-serif; font-size:12px; font-weight:800; background:oklch(66% 0.21 148/0.12); color:var(--accent); width:34px; height:34px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.learn-card h4 { font-size:15px; font-weight:700; margin-bottom:5px; }
+.learn-card p  { font-size:14px; color:var(--fg2); line-height:1.5; }
+
+/* VIDEO */
+.video-wrap { border-radius:20px; overflow:hidden; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; box-shadow:0 0 100px oklch(66% 0.21 148/0.1); }
+.play-btn { width:84px; height:84px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.2s; animation:pulse 2.4s ease-out infinite; }
+.play-btn:hover { transform:scale(1.1); }
+.play-btn svg { margin-left:5px; }
+
+/* WHY */
+.why-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; perspective:800px; }
+.why-card { border-radius:var(--r); padding:30px 26px; cursor:default; }
+.w-icon { width:48px; height:48px; border-radius:12px; background:oklch(66% 0.21 148/0.1); display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:18px; }
+.why-card h4 { font-size:16px; font-weight:700; margin-bottom:8px; }
+.why-card p  { font-size:14px; color:var(--fg2); line-height:1.65; }
+
+/* DETAILS */
+.det-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; max-width:480px; margin:0 auto; perspective:600px; }
+.det-card { border-radius:var(--r); padding:22px; text-align:center; cursor:default; }
+.det-card .val { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.det-card .lbl { font-size:13px; color:var(--fg2); margin-top:6px; }
+
+/* PRICING */
+.p-wrap { max-width:440px; margin:0 auto; }
+.p-card { border-radius:22px; padding:44px 36px; text-align:center; position:relative; overflow:hidden; animation:pglow 4s ease-in-out infinite; }
+@keyframes pglow { 0%,100%{box-shadow:0 0 0 0 oklch(66% 0.21 148/0)} 50%{box-shadow:0 0 80px oklch(66% 0.21 148/0.2)} }
+.p-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--accent),var(--accent2)); }
+.p-badge { display:inline-block; margin-bottom:22px; background:oklch(66% 0.21 148/0.1); border:1px solid oklch(66% 0.21 148/0.3); color:var(--accent); font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:5px 16px; border-radius:100px; animation:floatB 3s ease-in-out infinite; }
+@keyframes floatB { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+.p-card h3   { font-size:22px; margin-bottom:6px; }
+.p-card .sub { font-size:14px; color:var(--fg2); margin-bottom:28px; }
+.p-card .old { font-size:14px; color:var(--fg2); text-decoration:line-through; }
+.p-card .main{ font-family:'Syne',sans-serif; font-size:56px; font-weight:800; }
+.p-card .main span { font-size:22px; font-weight:500; color:var(--fg2); }
+.p-card .note{ font-size:13px; color:var(--fg2); margin:4px 0 30px; }
+.p-card .btn { margin-bottom:14px; }
+.feats { list-style:none; text-align:left; border-top:1px solid var(--border); padding-top:24px; margin-top:24px; display:flex; flex-direction:column; gap:10px; }
+.feats li { display:flex; gap:10px; font-size:14px; color:var(--fg2); }
+.feats li::before { content:'✓'; color:var(--accent); font-weight:700; flex-shrink:0; }
+
+/* FACILITATOR */
+.fac { border-radius:22px; padding:44px 36px; display:flex; gap:36px; align-items:flex-start; max-width:640px; margin:0 auto; }
+.fac-photo { width:100px; height:100px; border-radius:50%; border:3px solid oklch(66% 0.21 148/0.3); display:flex; align-items:center; justify-content:center; font-size:38px; flex-shrink:0; background:rgba(14,24,16,0.8); }
+.fac-info h3   { font-size:24px; font-weight:800; margin-bottom:4px; }
+.fac-role { font-size:12px; color:var(--accent); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:14px; }
+.fac-info p { font-size:15px; color:var(--fg2); line-height:1.75; }
+
+/* FINAL */
+.final { border-top:1px solid var(--border); text-align:center; padding:90px 24px; background:rgba(5,9,6,0.5); backdrop-filter:blur(16px); }
+.final h2 { font-size:clamp(28px,4vw,46px); margin-bottom:14px; }
+.final p  { font-size:17px; color:var(--fg2); margin:0 auto 36px; max-width:460px; }
+.final .btn { max-width:380px; margin:0 auto 16px; }
+
+footer { text-align:center; padding:28px 24px; font-size:13px; color:var(--fg2); border-top:1px solid var(--border); background:rgba(5,9,6,0.4); }
+
+@media (max-width:600px) {
+  nav { padding:12px 16px; }
+  .hero { padding:100px 16px 64px; }
+  .price-pill { padding:18px 24px 20px; }
+  .why-grid { grid-template-columns:1fr; }
+  .fac { flex-direction:column; align-items:center; text-align:center; padding:28px 20px; gap:20px; }
+  .p-card { padding:28px 20px; }
+  section { padding:56px 16px; }
+  .learn-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- INTRO INTERATIVO -->
+<div id="intro">
+  <canvas id="intro-bg"></canvas>
+  <div id="intro-ui">
+    <div id="intro-hint" class="intro-hint">
+      <div class="hint-icon">↗</div>
+      <span>Conecte o fluxo para entrar</span>
+    </div>
+    <canvas id="intro-flow"></canvas>
+    <div id="intro-success" class="intro-success">
+      <div class="success-icon">✓</div>
+      <div class="success-text">Fluxo conectado!</div>
+    </div>
+  </div>
+</div>
+
+<div id="page">
+
+<nav id="nav">
+  <span class="nav-logo">IA Business</span>
+  <a href="#pricing" class="nav-cta">Quero me inscrever</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+    <div class="tag" style="opacity:0;animation:fadeUp 0.5s 0.15s forwards;">Getúlio Vargas, RS · 100% Presencial</div>
+    <h1>Treinamento de Inteligência Artificial<br><em class="accent-text">Aplicada a Negócios</em></h1>
+    <p>Você já parou para pensar por que tantas empresas falam em IA, mas poucas realmente implementam? Falta gente qualificada. Aprenda IA agora e seja o profissional que as empresas estão procurando.</p>
+    <div class="price-pill glass">
+      <span class="old">De R$ 540,00</span>
+      <div class="main"><span>R$&nbsp;</span>390</div>
+      <span class="note">Preço de lançamento · Parcelado em até 4x no cartão</span>
+    </div>
+    <div class="hero-acts">
+      <a href="#pricing" class="btn pulse">Garantir minha vaga agora</a>
+      <span class="lock">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        Pagamento 100% seguro · 7 dias de garantia
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stat" data-anim="up" data-d="1"><h3 data-count="10">10</h3><p>Vagas por turma</p></div>
+    <div class="stat" data-anim="up" data-d="2"><h3 data-count="30" data-suffix="h">30h</h3><p>Carga horária</p></div>
+    <div class="stat" data-anim="up" data-d="3"><h3 data-count="5">5</h3><p>Aulas presenciais</p></div>
+  </div>
+</div>
+
+<!-- APRENDER -->
+<section>
+  <div class="container">
+    <div class="s-hd" data-anim="up">
+      <div class="tag">Conteúdo</div>
+      <h2>O que você vai aprender</h2>
+      <p>Conteúdo prático e aplicável para transformar seu negócio com Inteligência Artificial.</p>
+    </div>
+    <div class="learn-grid">
+      <div class="learn-card glass tilt" data-anim="left" data-d="1"><div class="num">01</div><div><h4>Jornada da I.A</h4><p>Domine as ferramentas de IA para criação de conteúdo, automação, análise de dados e produtividade.</p></div></div>
+      <div class="learn-card glass tilt" data-anim="right" data-d="1"><div class="num">02</div><div><h4>Agentes de I.A</h4><p>Automatize tarefas repetitivas e conecte seu assistente ao WhatsApp para responder clientes 24/7.</p></div></div>
+      <div class="learn-card glass tilt" data-anim="left" data-d="2"><div class="num">03</div><div><h4>Analista de Vendas</h4><p>Use IA para analisar métricas, identificar padrões de conversão e transformar dados em decisões estratégicas.</p></div></div>
+      <div class="learn-card glass tilt" data-anim="right" data-d="2"><div class="num">04</div><div><h4>Analista Financeiro</h4><p>IA que lê Notas Fiscais, organiza dados e entrega um dashboard gerencial atualizado em tempo real.</p></div></div>
+      <div class="learn-card glass tilt" data-anim="left" data-d="3"><div class="num">05</div><div><h4>Analista de Crédito</h4><p>Crie um sistema que realiza análise de crédito automatizada, avaliando perfis, históricos e riscos.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO -->
+<section style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="s-hd" data-anim="up">
+      <div class="tag">Apresentação</div>
+      <h2>Veja como funciona o treinamento</h2>
+    </div>
+    <div class="video-wrap glass tilt" data-anim="zoom">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+        <div class="play-btn"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"></polygon></svg></div>
+        <p style="font-size:14px;color:var(--fg2);">Vídeo de apresentação do curso</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POR QUE -->
+<section>
+  <div class="container">
+    <div class="s-hd" data-anim="up">
+      <div class="tag">Por que agora?</div>
+      <h2>Por que fazer este curso?</h2>
+      <p>Aprenda IA na prática, aplique em projetos reais e transforme sua carreira!</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card glass tilt" data-anim="left" data-d="1"><div class="w-icon">🚀</div><h4>Turbine sua Carreira com IA</h4><p>Empresas estão promovendo profissionais que dominam IA. Adquira essas competências agora.</p></div>
+      <div class="why-card glass tilt" data-anim="right" data-d="1"><div class="w-icon">🤝</div><h4>100% Presencial</h4><p>Interação direta com o facilitador e networking entre participantes em Getúlio Vargas, RS.</p></div>
+      <div class="why-card glass tilt" data-anim="left" data-d="2"><div class="w-icon">📊</div><h4>Cases Reais</h4><p>Aprenda com automações empresariais que já geraram resultados mensuráveis.</p></div>
+      <div class="why-card glass tilt" data-anim="right" data-d="2"><div class="w-icon">🎯</div><h4>Projetos Práticos</h4><p>Desenvolva projetos aplicáveis ao seu dia a dia, do atendimento ao pós-venda.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- DETALHES -->
+<section style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="s-hd" data-anim="up">
+      <div class="tag">Detalhes do Curso</div>
+      <h2>O que está incluído</h2>
+    </div>
+    <div class="det-grid">
+      <div class="det-card glass tilt" data-anim="up" data-d="1"><div class="val">5</div><div class="lbl">Aulas presenciais</div></div>
+      <div class="det-card glass tilt" data-anim="up" data-d="2"><div class="val">30h</div><div class="lbl">Carga horária total</div></div>
+      <div class="det-card glass tilt" data-anim="up" data-d="3"><div class="val">10</div><div class="lbl">Vagas por turma</div></div>
+      <div class="det-card glass tilt" data-anim="up" data-d="4"><div class="val">4x</div><div class="lbl">No cartão de crédito</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <div class="s-hd" data-anim="up">
+      <div class="tag">Investimento</div>
+      <h2>Garanta seu acesso</h2>
+      <p>Oferta por tempo limitado. O preço volta ao normal em breve.</p>
+    </div>
+    <div class="p-wrap" data-anim="zoom">
+      <div class="p-card glass2">
+        <div class="p-badge">🔥 Preço de Lançamento</div>
+        <h3>IA Business</h3>
+        <p class="sub">Treinamento presencial · Getúlio Vargas, RS</p>
+        <div class="old">De R$ 540,00</div>
+        <div class="main"><span>R$&nbsp;</span>390</div>
+        <div class="note">Parcelado em até 4x no cartão · Valor promocional para as primeiras turmas</div>
+        <a href="#form" class="btn pulse">Quero me inscrever agora</a>
+        <div class="lock" style="justify-content:center;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          Pagamento seguro · 7 dias de garantia
+        </div>
+        <ul class="feats">
+          <li>5 aulas presenciais · 30 horas totais</li>
+          <li>Até 10 pessoas por turma</li>
+          <li>5 módulos com projetos práticos</li>
+          <li>Certificado de Conclusão 30h</li>
+          <li>Getúlio Vargas, RS</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FACILITADOR -->
+<section style="border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="s-hd" data-anim="up">
+      <div class="tag">Seu facilitador</div>
+      <h2>Quem vai te ensinar</h2>
+    </div>
+    <div class="fac glass tilt" data-anim="up">
+      <div class="fac-photo">👤</div>
+      <div class="fac-info">
+        <h3>Olivan Greiner</h3>
+        <div class="fac-role">Especialista em I.A e Automação · Professor Universitário</div>
+        <p>6 anos coordenando projetos práticos de IA. Experiência comprovada no ensino e desenvolvimento, com cases reais implementados e resultados mensuráveis. <em style="color:var(--accent);font-style:normal;">"Transforme teoria em prática."</em></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORM -->
+<section id="form" style="border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="s-hd" data-anim="up">
+      <div class="tag">Inscrição</div>
+      <h2>Conquiste sua vaga</h2>
+      <p>Preencha abaixo e receba via WhatsApp todas as informações sobre datas e condições especiais.</p>
+    </div>
+    <div class="p-wrap" data-anim="zoom">
+      <div class="p-card glass2" style="padding:36px 32px;">
+        <div style="display:flex;flex-direction:column;gap:14px;text-align:left;">
+          <div>
+            <label style="font-size:13px;font-weight:600;color:var(--fg2);display:block;margin-bottom:6px;">Nome completo</label>
+            <input type="text" placeholder="Seu nome completo" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-size:15px;color:var(--fg);font-family:Inter,sans-serif;outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div>
+            <label style="font-size:13px;font-weight:600;color:var(--fg2);display:block;margin-bottom:6px;">WhatsApp</label>
+            <input type="tel" placeholder="(00) 00000-0000" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-size:15px;color:var(--fg);font-family:Inter,sans-serif;outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <p style="font-size:12px;color:var(--fg2);text-align:center;">Em breve novas datas — vagas limitadas!</p>
+          <a href="#" class="btn pulse" style="margin-top:4px;">Quero me inscrever!</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL -->
+<div class="final">
+  <div class="container">
+    <h2 data-anim="up">Vagas Limitadas — Até 10 por Turma</h2>
+    <p data-anim="up" data-d="1">Inscreva-se agora e receba via WhatsApp informações sobre datas, investimento e condições especiais!</p>
+    <a href="#form" class="btn pulse" data-anim="up" data-d="2" style="display:block;max-width:380px;margin:0 auto 16px;">Garantir minha vaga agora</a>
+    <div class="lock" data-anim="fade" data-d="3" style="justify-content:center;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      7 dias de garantia · Sem burocracia
+    </div>
+  </div>
+</div>
+
+<footer><p>© 2026 IA Business · Getúlio Vargas, RS · Todos os direitos reservados</p></footer>
+
+</div><!-- /#page -->
+
+<script>
+/* =============================================
+   3D NETWORK BACKGROUND
+   ============================================= */
+const bgC  = document.getElementById('bg-canvas');
+const bgX  = bgC.getContext('2d');
+let BW, BH;
+
+function resizeBg() {
+  BW = bgC.width  = window.innerWidth;
+  BH = bgC.height = window.innerHeight;
+}
+resizeBg();
+window.addEventListener('resize', resizeBg);
+
+const N = 72;
+const FOCAL = 520;
+let rotX = 0, rotY = 0, bgScrollY = 0, mX = 0, mY = 0, bgT = 0;
+
+const nodes = Array.from({ length: N }, () => ({
+  x: (Math.random() - .5) * 1400,
+  y: (Math.random() - .5) * 900,
+  z: (Math.random() - .5) * 700,
+  vx: (Math.random() - .5) * .28,
+  vy: (Math.random() - .5) * .28,
+  vz: (Math.random() - .5) * .18,
+  r:  Math.random() * 2.2 + 1,
+  ph: Math.random() * Math.PI * 2,
+}));
+
+// edges
+const edges = [];
+for (let i = 0; i < N; i++) {
+  for (let j = i + 1; j < N; j++) {
+    const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y, dz = nodes[i].z - nodes[j].z;
+    const d = Math.sqrt(dx*dx + dy*dy + dz*dz);
+    if (d < 300) edges.push([i, j, d]);
+  }
+}
+
+// packets
+const pkts = edges
+  .filter(() => Math.random() < 0.22)
+  .map(e => ({ e, t: Math.random(), sp: .003 + Math.random() * .004 }));
+
+function project(x, y, z) {
+  const cy = Math.cos(rotY), sy = Math.sin(rotY);
+  const x1 = x*cy + z*sy, z1 = -x*sy + z*cy;
+  const cx = Math.cos(rotX), sx = Math.sin(rotX);
+  const y1 = y*cx - z1*sx, z2 = y*sx + z1*cx;
+  const sc = FOCAL / (FOCAL + z2);
+  return { sx: x1*sc + BW/2, sy: y1*sc + BH/2 + bgScrollY*0.1, sc, z: z2 };
+}
+
+function drawBg() {
+  bgX.clearRect(0, 0, BW, BH);
+  bgT += .006;
+
+  // smooth mouse rotation
+  const tRY = (mX/BW - .5) * .55;
+  const tRX = (mY/BH - .5) * -.3;
+  rotY += (tRY - rotY) * .018 + .0007;
+  rotX += (tRX - rotX) * .018;
+
+  // move nodes
+  nodes.forEach(n => {
+    n.x += n.vx; n.y += n.vy; n.z += n.vz;
+    if (Math.abs(n.x) > 700) n.vx *= -1;
+    if (Math.abs(n.y) > 450) n.vy *= -1;
+    if (Math.abs(n.z) > 350) n.vz *= -1;
+  });
+
+  const P = nodes.map(n => project(n.x, n.y, n.z));
+
+  // edges
+  edges.forEach(([a, b, d]) => {
+    const pa = P[a], pb = P[b];
+    const az = (pa.z + pb.z) / 2;
+    const da = Math.max(0, 1 - (az + 350) / 700) * (1 - d/300) * 0.32;
+    if (da < .01) return;
+    bgX.beginPath();
+    bgX.moveTo(pa.sx, pa.sy);
+    bgX.lineTo(pb.sx, pb.sy);
+    bgX.strokeStyle = `rgba(80,210,120,${da})`;
+    bgX.lineWidth = .85;
+    bgX.stroke();
+  });
+
+  // packets
+  pkts.forEach(pkt => {
+    pkt.t = (pkt.t + pkt.sp) % 1;
+    const [a, b] = pkt.e;
+    const pa = P[a], pb = P[b];
+    const px = pa.sx + (pb.sx - pa.sx) * pkt.t;
+    const py = pa.sy + (pb.sy - pa.sy) * pkt.t;
+    const az = (pa.z + pb.z) / 2;
+    const al = Math.max(0, 1 - (az + 350) / 700);
+    if (al < .05) return;
+    const g = bgX.createRadialGradient(px, py, 0, px, py, 7);
+    g.addColorStop(0, `rgba(140,255,170,${al*.9})`);
+    g.addColorStop(1, 'rgba(140,255,170,0)');
+    bgX.beginPath(); bgX.arc(px, py, 3.5, 0, Math.PI*2);
+    bgX.fillStyle = g; bgX.fill();
+  });
+
+  // nodes
+  nodes.forEach((n, i) => {
+    const p = P[i];
+    const da = Math.max(0, 1 - (p.z + 350) / 700);
+    if (da < .04) return;
+    const pulse = .5 + .5 * Math.sin(bgT*2 + n.ph);
+    const r = n.r * p.sc * (.8 + .4*pulse);
+    if (r <= 0) return;
+
+    // glow
+    const g = bgX.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r*5);
+    g.addColorStop(0, `rgba(80,220,120,${da*.25*pulse})`);
+    g.addColorStop(1, 'rgba(80,220,120,0)');
+    bgX.beginPath(); bgX.arc(p.sx, p.sy, r*5, 0, Math.PI*2);
+    bgX.fillStyle = g; bgX.fill();
+
+    // core
+    bgX.beginPath(); bgX.arc(p.sx, p.sy, Math.max(r,.5), 0, Math.PI*2);
+    bgX.fillStyle = `rgba(110,245,145,${da*(.5+.5*pulse)})`;
+    bgX.fill();
+  });
+
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+window.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; }, { passive: true });
+window.addEventListener('scroll',    () => { bgScrollY = window.scrollY; }, { passive: true });
+
+/* =============================================
+   INTRO
+   ============================================= */
+/* =============================================
+   INTRO — INTERACTIVE FLOW CONNECTION
+   ============================================= */
+(function() {
+  const introBg  = document.getElementById('intro-bg');
+  const flowC    = document.getElementById('intro-flow');
+  const hint     = document.getElementById('intro-hint');
+  const success  = document.getElementById('intro-success');
+  const ibx      = introBg.getContext('2d');
+  const fx       = flowC.getContext('2d');
+
+  // Size flow canvas
+  const CW = Math.min(window.innerWidth * 0.88, 560);
+  const CH = 260;
+  flowC.width  = CW;
+  flowC.height = CH;
+  flowC.style.width  = CW + 'px';
+  flowC.style.height = CH + 'px';
+
+  // BG canvas
+  function resizeIBg() {
+    introBg.width  = window.innerWidth;
+    introBg.height = window.innerHeight;
+  }
+  resizeIBg();
+  window.addEventListener('resize', resizeIBg);
+
+  // Background subtle node network for intro
+  const bgNodes = Array.from({length:40},()=>({
+    x:(Math.random()-0.5)*1200, y:(Math.random()-0.5)*700, z:(Math.random()-0.5)*400,
+    vx:(Math.random()-0.5)*0.25, vy:(Math.random()-0.5)*0.25,
+    r:Math.random()*1.8+0.8, ph:Math.random()*Math.PI*2
+  }));
+  const bgEdges=[];
+  for(let i=0;i<bgNodes.length;i++) for(let j=i+1;j<bgNodes.length;j++){
+    const d=Math.hypot(bgNodes[i].x-bgNodes[j].x,bgNodes[i].y-bgNodes[j].y);
+    if(d<280) bgEdges.push([i,j,d]);
+  }
+  let iRotY=0, iT=0;
+  function drawIBg(){
+    if(!introBg.isConnected) return;
+    const W=introBg.width, H=introBg.height;
+    ibx.clearRect(0,0,W,H); iT+=0.006; iRotY+=0.0006;
+    bgNodes.forEach(n=>{n.x+=n.vx;n.y+=n.vy;if(Math.abs(n.x)>600)n.vx*=-1;if(Math.abs(n.y)>350)n.vy*=-1;});
+    const proj=bgNodes.map(n=>{
+      const cy=Math.cos(iRotY),sy=Math.sin(iRotY);
+      const x1=n.x*cy+n.z*sy,z1=-n.x*sy+n.z*cy;
+      const sc=420/(420+z1);
+      return{sx:x1*sc+W/2,sy:n.y*sc+H/2,sc,z:z1};
+    });
+    bgEdges.forEach(([a,b,d])=>{
+      const pa=proj[a],pb=proj[b];
+      const al=Math.max(0,(1-(pa.z+400)/800))*(1-d/280)*0.2;
+      if(al<0.01)return;
+      ibx.beginPath();ibx.moveTo(pa.sx,pa.sy);ibx.lineTo(pb.sx,pb.sy);
+      ibx.strokeStyle=`rgba(80,210,120,${al})`;ibx.lineWidth=0.7;ibx.stroke();
+    });
+    bgNodes.forEach((n,i)=>{
+      const p=proj[i]; const da=Math.max(0,1-(p.z+400)/800);
+      if(da<0.04)return;
+      const pulse=0.5+0.5*Math.sin(iT*2+n.ph);
+      const r=Math.max(0.1, n.r*p.sc*(0.8+0.4*pulse));
+      const g=ibx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,r*4);
+      g.addColorStop(0,`rgba(80,220,120,${da*0.2*pulse})`);g.addColorStop(1,'rgba(80,220,120,0)');
+      ibx.beginPath();ibx.arc(p.sx,p.sy,r*4,0,Math.PI*2);ibx.fillStyle=g;ibx.fill();
+      ibx.beginPath();ibx.arc(p.sx,p.sy,r,0,Math.PI*2);
+      ibx.fillStyle=`rgba(100,240,140,${da*(0.4+0.6*pulse)})`;ibx.fill();
+    });
+    requestAnimationFrame(drawIBg);
+  }
+  drawIBg();
+
+  // NODES definition
+  const nodeW=130, nodeH=56, portR=9;
+  const nodes=[
+    { x: CW*0.08,  y: CH/2-nodeH/2, label:'Webhook', icon:'⚡', color:'#4CAF50' },
+    { x: CW*0.43,  y: CH/2-nodeH/2, label:'OpenAI',  icon:'🧠', color:'#7C4DFF' },
+    { x: CW*0.79,  y: CH/2-nodeH/2, label:'WhatsApp',icon:'📱', color:'#25D366' },
+  ];
+  // Connections (pairs of node indices)
+  const connections=[];
+  // Which connection is needed: 0→1, 1→2
+  const needed=[[0,1],[1,2]];
+
+  // Dragging state
+  let dragging=false, dragFrom=null, dragX=0, dragY=0;
+  let animT=0;
+
+  // Port positions
+  function outPort(n){ return {x:n.x+nodeW, y:n.y+nodeH/2}; }
+  function inPort(n){  return {x:n.x,       y:n.y+nodeH/2}; }
+  function isNear(ax,ay,bx,by,r){ return Math.hypot(ax-bx,ay-by)<r; }
+
+  function getCanvasPos(e){
+    const rect=flowC.getBoundingClientRect();
+    const touch=e.touches?e.touches[0]:e;
+    return { x: touch.clientX-rect.left, y: touch.clientY-rect.top };
+  }
+
+  function drawFlow(){
+    fx.clearRect(0,0,CW,CH);
+    animT+=0.04;
+
+    // Draw existing connections with animated packets
+    connections.forEach(([ai,bi])=>{
+      const a=nodes[ai],b=nodes[bi];
+      const ax=outPort(a).x, ay=outPort(a).y;
+      const bx=inPort(b).x,  by=inPort(b).y;
+      const cp1x=ax+(bx-ax)*0.5, cp1y=ay;
+      const cp2x=ax+(bx-ax)*0.5, cp2y=by;
+
+      // Glow line
+      fx.beginPath();
+      fx.moveTo(ax,ay);fx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,bx,by);
+      fx.strokeStyle='rgba(80,210,120,0.6)';fx.lineWidth=2.5;fx.stroke();
+
+      // Packet
+      const t=((animT*0.022+ai*0.35)%1);
+      const u=1-t;
+      const px=u*u*u*ax+3*u*u*t*cp1x+3*u*t*t*cp2x+t*t*t*bx;
+      const py=u*u*u*ay+3*u*u*t*cp1y+3*u*t*t*cp2y+t*t*t*by;
+      const g2=fx.createRadialGradient(px,py,0,px,py,8);
+      g2.addColorStop(0,'rgba(140,255,170,0.9)');g2.addColorStop(1,'rgba(140,255,170,0)');
+      fx.beginPath();fx.arc(px,py,4,0,Math.PI*2);fx.fillStyle=g2;fx.fill();
+    });
+
+    // Draw drag line
+    if(dragging && dragFrom!==null){
+      const p=outPort(nodes[dragFrom]);
+      fx.beginPath();fx.moveTo(p.x,p.y);
+      const cp1x=p.x+(dragX-p.x)*0.5, cp1y=p.y;
+      const cp2x=p.x+(dragX-p.x)*0.5, cp2y=dragY;
+      fx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,dragX,dragY);
+      fx.strokeStyle='rgba(80,210,120,0.4)';fx.lineWidth=2;fx.setLineDash([6,4]);fx.stroke();
+      fx.setLineDash([]);
+    }
+
+    // Draw nodes
+    nodes.forEach((n,i)=>{
+      const isConnectedOut=connections.some(([a])=>a===i);
+      const isConnectedIn =connections.some(([,b])=>b===i);
+
+      // Card shadow / glow
+      if(isConnectedOut||isConnectedIn){
+        fx.shadowColor='rgba(80,210,120,0.4)';fx.shadowBlur=16;
+      }
+
+      // Card bg
+      roundRectFx(fx,n.x,n.y,nodeW,nodeH,10);
+      fx.fillStyle='rgba(12,22,14,0.95)';fx.fill();
+      fx.strokeStyle=isConnectedOut||isConnectedIn?'rgba(80,210,120,0.7)':'rgba(80,210,120,0.3)';
+      fx.lineWidth=1.5;fx.stroke();
+      fx.shadowBlur=0;
+
+      // Top bar
+      roundRectFx(fx,n.x,n.y,nodeW,4,[10,10,0,0]);
+      fx.fillStyle=n.color+'cc';fx.fill();
+
+      // Icon + label
+      fx.font=`${nodeH*0.32}px sans-serif`;fx.textAlign='center';fx.fillStyle='#fff';
+      fx.fillText(n.icon,n.x+nodeW/2,n.y+nodeH*0.5);
+      fx.font=`600 ${nodeH*0.2}px Inter,sans-serif`;fx.fillStyle='rgba(200,240,210,0.85)';
+      fx.fillText(n.label,n.x+nodeW/2,n.y+nodeH*0.78);
+
+      // Output port
+      const op=outPort(n);
+      fx.beginPath();fx.arc(op.x,op.y,portR,0,Math.PI*2);
+      fx.fillStyle=isConnectedOut?'rgba(80,210,120,1)':'rgba(80,210,120,0.35)';fx.fill();
+      fx.strokeStyle='rgba(80,210,120,0.9)';fx.lineWidth=1.5;fx.stroke();
+      // Pulse ring on output if not connected
+      if(!isConnectedOut){
+        const ring=(animT*0.04)%1;
+        fx.beginPath();fx.arc(op.x,op.y,portR+ring*10,0,Math.PI*2);
+        fx.strokeStyle=`rgba(80,210,120,${0.4*(1-ring)})`;fx.lineWidth=1;fx.stroke();
+      }
+
+      // Input port (only for nodes that still need input)
+      if(i>0){
+        const ip=inPort(n);
+        fx.beginPath();fx.arc(ip.x,ip.y,portR,0,Math.PI*2);
+        fx.fillStyle=isConnectedIn?'rgba(80,210,120,1)':'rgba(20,40,24,0.9)';fx.fill();
+        fx.strokeStyle='rgba(80,210,120,0.6)';fx.lineWidth=1.5;fx.stroke();
+      }
+    });
+
+    requestAnimationFrame(drawFlow);
+  }
+  drawFlow();
+
+  // Mouse/touch events
+  flowC.addEventListener('mousedown',  onStart);
+  flowC.addEventListener('touchstart', onStart, {passive:false});
+  flowC.addEventListener('mousemove',  onMove);
+  flowC.addEventListener('touchmove',  onMove, {passive:false});
+  flowC.addEventListener('mouseup',    onEnd);
+  flowC.addEventListener('touchend',   onEnd);
+  document.addEventListener('mouseup', onEnd);
+
+  function onStart(e){
+    e.preventDefault();
+    const {x,y}=getCanvasPos(e);
+    for(let i=0;i<nodes.length;i++){
+      const op=outPort(nodes[i]);
+      if(isNear(x,y,op.x,op.y,portR+8)){
+        dragging=true; dragFrom=i; dragX=x; dragY=y;
+        break;
+      }
+    }
+  }
+  function onMove(e){
+    if(!dragging)return;
+    e.preventDefault();
+    const {x,y}=getCanvasPos(e);
+    dragX=x; dragY=y;
+  }
+  function onEnd(e){
+    if(!dragging)return;
+    const pos=e.changedTouches?
+      (()=>{const r=flowC.getBoundingClientRect();return{x:e.changedTouches[0].clientX-r.left,y:e.changedTouches[0].clientY-r.top};})() :
+      getCanvasPos(e);
+
+    // Check if dropped on any input port
+    for(let i=0;i<nodes.length;i++){
+      if(i===dragFrom)continue;
+      const ip=inPort(nodes[i]);
+      if(isNear(pos.x,pos.y,ip.x,ip.y,portR+14)){
+        // Valid connection?
+        if(needed.some(([a,b])=>a===dragFrom&&b===i)){
+          if(!connections.some(([a,b])=>a===dragFrom&&b===i)){
+            connections.push([dragFrom,i]);
+            // Check if all done
+            if(connections.length>=needed.length){
+              setTimeout(completeIntro, 400);
+            }
+          }
+        }
+        break;
+      }
+    }
+    dragging=false; dragFrom=null;
+  }
+
+  function completeIntro(){
+    hint.style.opacity='0';
+    success.classList.add('show');
+    // Particle burst
+    spawnParticles();
+    setTimeout(()=>{
+      document.getElementById('intro').classList.add('done');
+      document.getElementById('nav').classList.add('show');
+    }, 1400);
+  }
+
+  function spawnParticles(){
+    const pc=document.createElement('canvas');
+    pc.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:10000;pointer-events:none;';
+    document.body.appendChild(pc);
+    pc.width=window.innerWidth; pc.height=window.innerHeight;
+    const pcx=pc.getContext('2d');
+    const cx=pc.width/2, cy=pc.height/2;
+    const parts=Array.from({length:60},()=>({
+      x:cx,y:cy,
+      vx:(Math.random()-0.5)*12,
+      vy:(Math.random()-0.5)*12,
+      r:Math.random()*4+2,
+      life:1,
+      color:`hsl(${130+Math.random()*40},90%,${55+Math.random()*20}%)`
+    }));
+    function drawParts(){
+      pcx.clearRect(0,0,pc.width,pc.height);
+      let alive=false;
+      parts.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy; p.vy+=0.25; p.life-=0.025;
+        if(p.life<=0)return; alive=true;
+        pcx.globalAlpha=p.life;
+        pcx.beginPath();pcx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        pcx.fillStyle=p.color;pcx.fill();
+      });
+      pcx.globalAlpha=1;
+      if(alive) requestAnimationFrame(drawParts);
+      else pc.remove();
+    }
+    drawParts();
+  }
+
+  function roundRectFx(ctx,x,y,w,h,r){
+    const radii=typeof r==='number'?[r,r,r,r]:r;
+    ctx.beginPath();
+    ctx.moveTo(x+radii[0],y);ctx.lineTo(x+w-radii[1],y);ctx.quadraticCurveTo(x+w,y,x+w,y+radii[1]);
+    ctx.lineTo(x+w,y+h-radii[2]);ctx.quadraticCurveTo(x+w,y+h,x+w-radii[2],y+h);
+    ctx.lineTo(x+radii[3],y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-radii[3]);
+    ctx.lineTo(x,y+radii[0]);ctx.quadraticCurveTo(x,y,x+radii[0],y);ctx.closePath();
+  }
+})();
+
+/* =============================================
+   SCROLL REVEAL + COUNTERS
+   ============================================= */
+const rObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('in');
+    e.target.querySelectorAll('[data-count]').forEach(countUp);
+    rObs.unobserve(e.target);
+  });
+}, { threshold: .12 });
+document.querySelectorAll('[data-anim]').forEach(el => rObs.observe(el));
+
+function countUp(el) {
+  const target = parseInt(el.dataset.count);
+  const pre = el.dataset.prefix || '', suf = el.dataset.suffix || '';
+  const t0 = performance.now();
+  (function step(now) {
+    const t = Math.min((now-t0)/1400, 1);
+    el.textContent = pre + Math.round((1-Math.pow(1-t,3))*target) + suf;
+    if (t < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
+/* =============================================
+   3D TILT
+   ============================================= */
+document.querySelectorAll('.tilt').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const dx = (e.clientX - r.left - r.width/2)  / (r.width/2);
+    const dy = (e.clientY - r.top  - r.height/2) / (r.height/2);
+    card.style.transform = `perspective(600px) rotateY(${dx*9}deg) rotateX(${-dy*6}deg) translateZ(10px)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(600px) rotateY(0) rotateX(0) translateZ(0)';
+  });
+});
+
+/* NAV */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), { passive: true });
+</script>
+</body>
+</html>
